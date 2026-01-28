@@ -347,7 +347,8 @@
         <div class="modal-box">
             <h3 class="font-bold text-lg">Import Data</h3>
             <p class="py-4">Upload a data JSON file to restore your entries.</p>
-            <input type="file" id="dataFileInput" accept=".json" class="file-input file-input-bordered w-full" />
+            <input type="file" id="dataFileInput" accept=".json,application/json,.JSON"
+                class="file-input file-input-bordered w-full" />
             <div class="modal-action">
                 <button class="btn btn-primary" onclick="importData()">Import</button>
                 <form method="dialog">
@@ -926,11 +927,16 @@
             const labels = filteredData.map(e => new Date(e.date).toLocaleDateString()).reverse();
             const data = filteredData.map(e => {
                 let val = e[statId];
-                if (val !== undefined && unitSystem === 'metric') {
-                    if (stat.category === 'temperature') return convert.fToC(val);
-                    if (stat.category === 'weight') return convert.lbsToKg(val);
+                if (val === undefined || val === null || val === '') return null;
+
+                let numVal = parseFloat(val);
+                if (isNaN(numVal)) return null;
+
+                if (unitSystem === 'metric') {
+                    if (stat.category === 'temperature') return convert.fToC(numVal);
+                    if (stat.category === 'weight') return convert.lbsToKg(numVal);
                 }
-                return val;
+                return numVal;
             }).reverse();
 
             // Destroy existing chart
@@ -938,35 +944,81 @@
                 currentChart.destroy();
             }
 
+            // Determine Y-axis limits
+            let yMin = undefined;
+            let yMax = undefined;
+
+            if (stat.min !== undefined && stat.min !== null) {
+                yMin = stat.min;
+                if (unitSystem === 'metric') {
+                    if (stat.category === 'temperature') yMin = convert.fToC(yMin);
+                    else if (stat.category === 'weight') yMin = convert.lbsToKg(yMin);
+                }
+            }
+
+            if (stat.max !== undefined && stat.max !== null) {
+                yMax = stat.max;
+                if (unitSystem === 'metric') {
+                    if (stat.category === 'temperature') yMax = convert.fToC(yMax);
+                    else if (stat.category === 'weight') yMax = convert.lbsToKg(yMax);
+                }
+            }
+
             // Create new chart
             const ctx = document.getElementById('mainChart').getContext('2d');
+            const displayUnit = getDisplayUnit(stat);
             currentChart = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: `${stat.name} ${stat.unit ? `(${stat.unit})` : ''}`,
+                        label: `${stat.name} ${displayUnit ? `(${displayUnit})` : ''}`,
                         data: data,
                         borderColor: stat.color,
                         backgroundColor: stat.color + '20',
                         tension: 0.4,
                         fill: true,
                         pointRadius: 4,
-                        pointHoverRadius: 6
+                        pointHoverRadius: 6,
+                        spanGaps: true
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index',
+                    },
                     plugins: {
                         legend: {
                             display: true,
                             position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += context.parsed.y.toFixed(1);
+                                    }
+                                    return label;
+                                }
+                            }
                         }
                     },
                     scales: {
                         y: {
-                            beginAtZero: false
+                            beginAtZero: stat.type === 'checkbox' || stat.id === 'power' || stat.id === 'flow' ? true : false,
+                            min: yMin,
+                            max: yMax,
+                            title: {
+                                display: !!displayUnit,
+                                text: displayUnit
+                            }
                         }
                     }
                 }
@@ -1047,26 +1099,48 @@
 
             const reader = new FileReader();
             reader.onload = (e) => {
+                let text = e.target.result;
                 try {
-                    const imported = JSON.parse(e.target.result);
+                    // Try parsing directly
+                    let imported = JSON.parse(text);
+
                     if (Array.isArray(imported)) {
-                        if (confirm('This will replace your current data. Continue?')) {
-                            entriesData = imported;
-                            saveEntriesData();
-                            updateDashboardStats();
-                            updateTableBody();
-                            updateChart();
-                            importDataModal.close();
-                            showToast('Data imported successfully!', 'success');
-                        }
+                        processImportedData(imported);
                     } else {
-                        showToast('Invalid data format', 'error');
+                        showToast('Invalid format: Data must be an array of entries', 'error');
                     }
                 } catch (err) {
-                    showToast('Error parsing data file', 'error');
+                    console.error('Initial parse failed:', err);
+
+                    // Fallback: Try cleaning the string (remove BOM, weird whitespace)
+                    try {
+                        const cleanText = text.trim().replace(/^\uFEFF/, '');
+                        const imported = JSON.parse(cleanText);
+                        if (Array.isArray(imported)) {
+                            processImportedData(imported);
+                            return;
+                        }
+                    } catch (err2) {
+                        console.error('Cleanup parse failed:', err2);
+                    }
+
+                    showToast(`Error parsing JSON: ${err.message}`, 'error');
                 }
             };
+            reader.onerror = () => showToast('Error reading file', 'error');
             reader.readAsText(file);
+        }
+
+        function processImportedData(imported) {
+            if (confirm(`Import ${imported.length} entries? This will replace your current data.`)) {
+                entriesData = imported;
+                saveEntriesData();
+                updateDashboardStats();
+                updateTableBody();
+                updateChart();
+                importDataModal.close();
+                showToast('Data imported successfully!', 'success');
+            }
         }
 
         // ============================================
