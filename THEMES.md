@@ -57,7 +57,7 @@ Unique color combinations for specific moods:
 
 ## Theme Recommendations
 
-### For Medical/Health Tracking (LVAD, etc.)
+### For Health & Medical Tracking
 - **Corporate** - Professional and easy to read
 - **Light** - Clean and clinical
 - **Business** - Serious and focused

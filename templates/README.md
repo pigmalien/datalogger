@@ -12,21 +12,6 @@ This folder contains pre-configured templates for different tracking needs. Impo
 
 ## Available Templates
 
-### 📊 LVAD Template (`lvad-template.json`)
-**For**: Left Ventricular Assist Device monitoring
-
-**Stats Included**:
-- Temperature (°F)
-- Weight (lbs)
-- Speed (RPM)
-- Flow (L/min)
-- PI (Pulsatility Index)
-- Power (Watts)
-
-**Use Case**: Daily monitoring of LVAD metrics with clinical alert thresholds built-in.
-
----
-
 ### 💓 Blood Pressure Template (`blood-pressure-template.json`)
 **For**: Blood pressure and heart rate monitoring
 
@@ -92,12 +77,12 @@ This folder contains pre-configured templates for different tracking needs. Impo
 - Resting Heart Rate (bpm)
 - Stress Level (1-10)
 
-**Use Case**: Monitor how sleep and stress impact your overall heart health and energy.
+**Use Case**: Monitor how sleep and stress impact your overall health and energy.
 
 ---
 
 ### 💧 Fluid & Sodium Manager (`fluid-sodium-tracker.json`)
-**For**: Managing heart-failure related dietary restrictions
+**For**: Managing hydration and dietary restrictions
 
 **Stats Included**:
 - Fluid Intake (oz)
@@ -105,14 +90,14 @@ This folder contains pre-configured templates for different tracking needs. Impo
 - Caffeine (mg)
 - Notes (text)
 
-**Use Case**: Critical for heart health and VAD patients managing daily salt and liquid intake.
+**Use Case**: Track daily salt and liquid intake for heart health or general wellness.
 
 ---
 
 ## Creating Your Own Template
 
 1. Configure your stats in the app using "Manage Stats"
-2. Click menu → "Export Template"
+2. Click menu (☰) → "Export Template"
 3. Save the JSON file
 4. Share with others or keep as a backup
 
@@ -138,10 +123,10 @@ Templates are JSON files with this structure:
 
 - **id**: Unique identifier (no spaces, lowercase recommended)
 - **name**: Display name shown in the UI
-- **type**: Either "number" or "text"
+- **type**: The type of input (number, checkbox, select, range, text, textarea, time)
 - **unit**: Unit of measurement (optional)
 - **color**: Hex color code for charts
-- **min/max**: Optional range hints for charts
+- **min/max**: Optional range hints for specific input types or charts
 
 ## Tips
 

@@ -1,40 +1,19 @@
-# LVAD Stat Logger
+# Stat Logger
 
-A user-definable stat logger built with DaisyUI for tracking LVAD (Left Ventricular Assist Device) metrics and other health data.
+A fully customizable, user-definable stat logger built with DaisyUI for tracking any metrics you care about. From health data to personal habits, track anything with ease.
 
 ## 🚀 Quick Start
 
 1. Open `index.html` in your web browser
 2. The app comes with a default template (Temperature, Weight, Heart Rate)
-3. To use the LVAD template, click the menu (☰) → "Import Template" → Select `lvad-template.json`
-
-## 📊 LVAD Template
-
-The LVAD template includes the following stats:
-
-- **Temperature** (°F) - Body temperature monitoring
-- **Weight** (lbs) - Daily weight tracking
-- **Speed** (RPM) - VAD pump speed
-- **Flow** (L/min) - VAD flow rate
-- **PI** - Pulsatility Index
-- **Power** (Watts) - VAD power consumption
-
-### Alert Thresholds (from original LVAD guidelines)
-
-The template includes these important thresholds:
-
-- **Temperature**: Alert if ≥ 101.5°F
-- **Weight**: Alert on 2-3 lbs overnight gain or 5 lbs in 1 week
-- **Flow**: Alert if changes by ≥ 2.0 L/min from baseline
-- **PI**: Alert if < 2, > 8, or changes by ± 4 from baseline
-- **Power**: Alert if > 8 watts or increases by ≥ 2 watts from baseline
+3. To customize your stats, click the menu (☰) → **Manage Stats**
 
 ## 🎨 Features
 
 ### User-Definable Stats
 - Add, edit, or remove stat types
 - Customize names, units, types, and chart colors
-- Create templates for different tracking needs
+- Supported types: Number, Checkbox, Dropdown, Range, Text, Time, and more
 
 ### Template Management
 - **Import Template**: Load pre-configured stat definitions
@@ -51,10 +30,10 @@ The template includes these important thresholds:
 - Multiple time ranges: 7 days, 30 days, 90 days, 1 year, all time
 - Color-coded charts matching your stat colors
 
-### Mobile-Friendly
-- Fully responsive design
+### Mobile-Friendly & Premium Design
+- Fully responsive design using DaisyUI and Tailwind CSS
 - Works on phones, tablets, and desktops
-- Touch-optimized interface
+- Touch-optimized interface with smooth animations
 
 ### Themes
 - Choose from 32 beautiful DaisyUI themes
@@ -77,22 +56,14 @@ The template includes these important thresholds:
 ### Managing Stats
 1. Click menu (☰) → "Manage Stats"
 2. Edit existing stats or add new ones
-3. Set name, unit, type (number/text), and color
+3. Set name, unit, type, and color
 4. Click "Save Configuration"
 
 ### Using Templates
-
-#### Import LVAD Template
-1. Click menu → "Import Template"
-2. Select `lvad-template.json`
-3. Click "Import"
-4. Your stats are now configured for LVAD tracking
-
-#### Create Your Own Template
 1. Configure your stats in "Manage Stats"
 2. Click menu → "Export Template"
 3. Save the JSON file
-4. Share with others or use on another device
+4. Share with others or use on another device by using "Import Template"
 
 ## 💾 Data Storage
 
@@ -103,24 +74,9 @@ All data is stored locally in your browser's localStorage:
 
 No data is sent to any server - everything stays on your device.
 
-## 🔄 Migrating from Old LVAD Logger
-
-If you have data from the original LVAD logger:
-
-1. Open the old logger
-2. Export your data (if available)
-3. Open the new stat logger
-4. Import the LVAD template (`lvad-template.json`)
-5. Import your data
-
-Note: The old logger stored data as `lvadData` in localStorage. The new logger uses `entriesData`. You may need to manually transfer data or re-enter historical entries.
-
 ## 📋 Example Templates
 
-### LVAD Template (included)
-For Left Ventricular Assist Device monitoring with all standard metrics.
-
-### Fitness Template (create your own)
+### Fitness Template
 ```json
 [
   {"id": "weight", "name": "Weight", "type": "number", "unit": "lbs", "color": "#3b82f6"},
@@ -139,6 +95,15 @@ For Left Ventricular Assist Device monitoring with all standard metrics.
 ]
 ```
 
+### Sleep Tracker Template
+```json
+[
+  {"id": "sleep_duration", "name": "Sleep Duration", "type": "number", "unit": "hrs", "color": "#6366f1"},
+  {"id": "sleep_quality", "name": "Sleep Quality", "type": "range", "min": 1, "max": 10, "color": "#8b5cf6"},
+  {"id": "bedtime", "name": "Bedtime", "type": "time", "color": "#4338ca"}
+]
+```
+
 ## 🛠️ Customization
 
 ### Changing Colors
@@ -150,37 +115,12 @@ Each stat has a color used in charts. Use the color picker in "Manage Stats" to 
 3. Configure the new stat
 4. Save
 
-### Stat Types
-- **Number**: For numeric values (shows in charts)
-- **Text**: For notes or categorical data (shows in table only)
-
-## 📞 When to Contact VAD Team
-
-Based on the original LVAD guidelines, contact your VAD team if:
-
-- VAD flow increases or decreases by 2.0 L/min or more from baseline
-- PI is less than 2 or greater than 8, or has changed by 4 from baseline
-- Power reading has increased by 2 watts from baseline, or is greater than 8
-- Weight gain of 2 to 3 lbs overnight or 5 lbs in 1 week
-- Increasing swelling in legs, hands, or abdomen
-- Temperature is 101.5°F or higher
-- Driveline is tugged or pulled
-- Signs of infection at driveline site (redness, tenderness, warmth, drainage)
-
 ## 🔒 Privacy & Security
 
 - All data stored locally on your device
 - No internet connection required
 - No data transmitted to external servers
 - Export your data regularly for backup
-
-## 💡 Tips
-
-1. **Daily Routine**: Set a reminder to log at the same time each day
-2. **Backup Regularly**: Export your data weekly/monthly
-3. **Share Templates**: Export templates to help others with similar tracking needs
-4. **Multiple Devices**: Export data and template, then import on other devices
-5. **Print Reports**: Use your browser's print function to create PDF reports
 
 ## 🆘 Troubleshooting
 
@@ -191,15 +131,15 @@ A: Data is stored in browser localStorage. Clearing browser data will delete it.
 A: Yes! Once loaded, the app works completely offline.
 
 **Q: How do I change units (e.g., °F to °C)?**
-A: Edit the stat in "Manage Stats" and change the unit field. You'll need to manually convert existing data.
+A: Use the unit toggle in the navigation bar for Temperature and Weight. For other stats, edit the stat in "Manage Stats" and change the unit field.
 
 **Q: Can I track non-numeric data?**
-A: Yes! Set stat type to "text" for notes, medications, or categorical data.
+A: Yes! Set stat type to "text", "textarea", or "select" for notes, medications, or categorical data.
 
 ## 📄 License
 
-Free to use for personal health tracking.
+Free to use for personal tracking.
 
 ---
 
-**Disclaimer**: This is a tracking tool only. Always consult with your healthcare provider for medical decisions.
+**Disclaimer**: This is a tracking tool only. Always consult with a professional for any critical data interpretation.
