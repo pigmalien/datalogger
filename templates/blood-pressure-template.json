@@ -1,0 +1,36 @@
+[
+    {
+        "id": "systolic",
+        "name": "Systolic",
+        "type": "number",
+        "unit": "mmHg",
+        "color": "#ef4444",
+        "min": 90,
+        "max": 180
+    },
+    {
+        "id": "diastolic",
+        "name": "Diastolic",
+        "type": "number",
+        "unit": "mmHg",
+        "color": "#3b82f6",
+        "min": 60,
+        "max": 120
+    },
+    {
+        "id": "pulse",
+        "name": "Pulse",
+        "type": "number",
+        "unit": "bpm",
+        "color": "#ec4899",
+        "min": 40,
+        "max": 120
+    },
+    {
+        "id": "notes",
+        "name": "Notes",
+        "type": "text",
+        "unit": "",
+        "color": "#6b7280"
+    }
+]

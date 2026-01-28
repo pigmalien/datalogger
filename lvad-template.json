@@ -1,0 +1,64 @@
+[
+  {
+    "id": "temperature",
+    "name": "Temperature",
+    "type": "number",
+    "unit": "°F",
+    "color": "#c87e7e",
+    "min": 95,
+    "max": 105,
+    "alertThreshold": 101.5,
+    "alertCondition": "above"
+  },
+  {
+    "id": "weight",
+    "name": "Weight",
+    "type": "number",
+    "unit": "lbs",
+    "color": "#937b6a",
+    "min": 100,
+    "max": 250
+  },
+  {
+    "id": "speed",
+    "name": "Speed",
+    "type": "number",
+    "unit": "RPM",
+    "color": "#838383",
+    "min": 2400,
+    "max": 10000
+  },
+  {
+    "id": "flow",
+    "name": "Flow",
+    "type": "number",
+    "unit": "L/min",
+    "color": "#87a985",
+    "min": 1,
+    "max": 10,
+    "alertThreshold": 2.0,
+    "alertCondition": "change"
+  },
+  {
+    "id": "pi",
+    "name": "PI",
+    "type": "number",
+    "unit": "",
+    "color": "#b089ab",
+    "min": 1,
+    "max": 10,
+    "alertMin": 2,
+    "alertMax": 8
+  },
+  {
+    "id": "power",
+    "name": "Power",
+    "type": "number",
+    "unit": "Watts",
+    "color": "#b9ab73",
+    "min": 1,
+    "max": 10,
+    "alertThreshold": 8,
+    "alertCondition": "above"
+  }
+]

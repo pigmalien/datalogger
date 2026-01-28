@@ -1,0 +1,43 @@
+[
+    {
+        "id": "glucose",
+        "name": "Blood Glucose",
+        "type": "number",
+        "unit": "mg/dL",
+        "color": "#ef4444",
+        "min": 40,
+        "max": 400
+    },
+    {
+        "id": "insulin",
+        "name": "Insulin Dose",
+        "type": "number",
+        "unit": "units",
+        "color": "#3b82f6",
+        "min": 0,
+        "max": 100
+    },
+    {
+        "id": "carbs",
+        "name": "Carbohydrates",
+        "type": "number",
+        "unit": "g",
+        "color": "#f59e0b",
+        "min": 0,
+        "max": 300
+    },
+    {
+        "id": "mealType",
+        "name": "Meal Type",
+        "type": "text",
+        "unit": "",
+        "color": "#10b981"
+    },
+    {
+        "id": "notes",
+        "name": "Notes",
+        "type": "text",
+        "unit": "",
+        "color": "#6b7280"
+    }
+]

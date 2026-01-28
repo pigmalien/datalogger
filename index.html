@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stat Logger</title>
+
+    <!-- DaisyUI + Tailwind CSS -->
+    <link href="assets/css/daisyui.min.css" rel="stylesheet" type="text/css" />
+    <script src="assets/js/tailwind.min.js"></script>
+
+    <!-- Chart.js -->
+    <script src="assets/js/chart.min.js"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .stat-input {
+            transition: all 0.3s ease;
+        }
+
+        .stat-input:focus {
+            transform: scale(1.02);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+
+        @keyframes pulse-glow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+            }
+
+            50% {
+                box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+            }
+        }
+
+        .pulse-save {
+            animation: pulse-glow 2s infinite;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+
+<body class="min-h-screen bg-base-200">
+
+    <!-- Navigation Bar -->
+    <div class="navbar bg-base-100 shadow-lg">
+        <div class="flex-1">
+            <a
+                class="btn btn-ghost text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                📊 Stat Logger
+            </a>
+        </div>
+        <div class="flex-none gap-2">
+            <!-- Unit Toggle -->
+            <div class="join inline-flex border border-base-300 mr-2">
+                <button id="unitImperial" class="btn btn-xs join-item btn-active"
+                    onclick="setUnitSystem('imperial')">Imp</button>
+                <button id="unitMetric" class="btn btn-xs join-item" onclick="setUnitSystem('metric')">Met</button>
+            </div>
+
+            <!-- Theme Selector -->
+            <div class="dropdown dropdown-end">
+                <div tabindex="0" role="button" class="btn btn-ghost btn-circle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                    </svg>
+                </div>
+                <ul tabindex="0"
+                    class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow-lg bg-base-100 rounded-box w-52 max-h-96 overflow-y-auto">
+                    <li class="menu-title">Choose Theme</li>
+                    <li><a onclick="changeTheme('light')">☀️ Light</a></li>
+                    <li><a onclick="changeTheme('dark')">🌙 Dark</a></li>
+                    <li><a onclick="changeTheme('cupcake')">🧁 Cupcake</a></li>
+                    <li><a onclick="changeTheme('bumblebee')">🐝 Bumblebee</a></li>
+                    <li><a onclick="changeTheme('emerald')">💚 Emerald</a></li>
+                    <li><a onclick="changeTheme('corporate')">💼 Corporate</a></li>
+                    <li><a onclick="changeTheme('synthwave')">🌆 Synthwave</a></li>
+                    <li><a onclick="changeTheme('retro')">📻 Retro</a></li>
+                    <li><a onclick="changeTheme('cyberpunk')">🤖 Cyberpunk</a></li>
+                    <li><a onclick="changeTheme('valentine')">💝 Valentine</a></li>
+                    <li><a onclick="changeTheme('halloween')">🎃 Halloween</a></li>
+                    <li><a onclick="changeTheme('garden')">🌸 Garden</a></li>
+                    <li><a onclick="changeTheme('forest')">🌲 Forest</a></li>
+                    <li><a onclick="changeTheme('aqua')">🌊 Aqua</a></li>
+                    <li><a onclick="changeTheme('lofi')">🎵 Lo-Fi</a></li>
+                    <li><a onclick="changeTheme('pastel')">🎨 Pastel</a></li>
+                    <li><a onclick="changeTheme('fantasy')">🦄 Fantasy</a></li>
+                    <li><a onclick="changeTheme('wireframe')">📐 Wireframe</a></li>
+                    <li><a onclick="changeTheme('black')">⬛ Black</a></li>
+                    <li><a onclick="changeTheme('luxury')">💎 Luxury</a></li>
+                    <li><a onclick="changeTheme('dracula')">🧛 Dracula</a></li>
+                    <li><a onclick="changeTheme('cmyk')">🖨️ CMYK</a></li>
+                    <li><a onclick="changeTheme('autumn')">🍂 Autumn</a></li>
+                    <li><a onclick="changeTheme('business')">👔 Business</a></li>
+                    <li><a onclick="changeTheme('acid')">🧪 Acid</a></li>
+                    <li><a onclick="changeTheme('lemonade')">🍋 Lemonade</a></li>
+                    <li><a onclick="changeTheme('night')">🌃 Night</a></li>
+                    <li><a onclick="changeTheme('coffee')">☕ Coffee</a></li>
+                    <li><a onclick="changeTheme('winter')">❄️ Winter</a></li>
+                    <li><a onclick="changeTheme('dim')">🔅 Dim</a></li>
+                    <li><a onclick="changeTheme('nord')">🏔️ Nord</a></li>
+                    <li><a onclick="changeTheme('sunset')">🌅 Sunset</a></li>
+                </ul>
+            </div>
+
+            <!-- Menu Dropdown -->
+            <div class="dropdown dropdown-end">
+                <div tabindex="0" role="button" class="btn btn-ghost btn-circle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6h16M4 12h16M4 18h7" />
+                    </svg>
+                </div>
+                <ul tabindex="0"
+                    class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow-lg bg-base-100 rounded-box w-52">
+                    <li><a onclick="manageTemplateModal.showModal()">📝 Manage Stats</a></li>
+                    <li><a onclick="importTemplateModal.showModal()">📥 Import Template</a></li>
+                    <li><a onclick="exportTemplate()">📤 Export Template</a></li>
+                    <li><a onclick="importDataModal.showModal()">📂 Import Data</a></li>
+                    <li><a onclick="exportData()">💾 Export Data</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container mx-auto p-4 max-w-7xl">
+
+        <!-- Stats Overview Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div class="stat bg-base-100 shadow-xl rounded-box">
+                <div class="stat-figure text-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        class="inline-block w-8 h-8 stroke-current">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <div class="stat-title">Total Entries</div>
+                <div class="stat-value text-primary" id="totalEntries">0</div>
+            </div>
+
+            <div class="stat bg-base-100 shadow-xl rounded-box">
+                <div class="stat-figure text-secondary">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        class="inline-block w-8 h-8 stroke-current">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4">
+                        </path>
+                    </svg>
+                </div>
+                <div class="stat-title">Active Stats</div>
+                <div class="stat-value text-secondary" id="activeStats">0</div>
+            </div>
+
+            <div class="stat bg-base-100 shadow-xl rounded-box">
+                <div class="stat-figure text-accent">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        class="inline-block w-8 h-8 stroke-current">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                        </path>
+                    </svg>
+                </div>
+                <div class="stat-title">Last Entry</div>
+                <div class="stat-value text-accent text-2xl" id="lastEntry">Never</div>
+            </div>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+            <!-- Left Column: Data Entry -->
+            <div class="card bg-base-100 shadow-xl">
+                <div class="card-body">
+                    <h2 class="card-title text-2xl mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        New Entry
+                    </h2>
+
+                    <!-- Date Input -->
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-semibold">Date</span>
+                        </label>
+                        <input type="date" id="dateInput" class="input input-bordered w-full" />
+                    </div>
+
+                    <!-- Dynamic Stat Inputs -->
+                    <div id="statInputsContainer" class="space-y-3 mt-4">
+                        <!-- Stats will be dynamically generated here -->
+                    </div>
+
+                    <!-- Save Button -->
+                    <div class="card-actions justify-end mt-6">
+                        <button id="saveButton" class="btn btn-primary btn-lg gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                            </svg>
+                            Save Entry
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Charts -->
+            <div class="card bg-base-100 shadow-xl">
+                <div class="card-body">
+                    <h2 class="card-title text-2xl mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        Visualizations
+                    </h2>
+
+                    <!-- Chart Selector -->
+                    <div class="form-control mb-4">
+                        <select id="chartSelector" class="select select-bordered w-full">
+                            <option disabled selected>Select a stat to visualize</option>
+                        </select>
+                    </div>
+
+                    <!-- Chart Container -->
+                    <div class="chart-container">
+                        <canvas id="mainChart"></canvas>
+                    </div>
+
+                    <!-- Time Range Selector -->
+                    <div class="flex gap-2 mt-4 flex-wrap">
+                        <button class="btn btn-sm btn-outline" onclick="updateChartRange(7)">7 Days</button>
+                        <button class="btn btn-sm btn-outline" onclick="updateChartRange(30)">30 Days</button>
+                        <button class="btn btn-sm btn-outline" onclick="updateChartRange(90)">90 Days</button>
+                        <button class="btn btn-sm btn-outline" onclick="updateChartRange(365)">1 Year</button>
+                        <button class="btn btn-sm btn-outline" onclick="updateChartRange(0)">All Time</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Table -->
+        <div class="card bg-base-100 shadow-xl mt-6">
+            <div class="card-body">
+                <h2 class="card-title text-2xl mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    Recent Entries
+                </h2>
+                <div class="overflow-x-auto">
+                    <table class="table table-zebra">
+                        <thead>
+                            <tr id="tableHeader">
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <!-- Data rows will be dynamically generated -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manage Stats Modal -->
+    <dialog id="manageTemplateModal" class="modal">
+        <div class="modal-box max-w-2xl">
+            <h3 class="font-bold text-2xl mb-4">Manage Stats</h3>
+            <p class="text-sm opacity-70 mb-4">Define the stats you want to track. Each stat can have a name, type,
+                unit, and color.</p>
+
+            <div id="statsConfigContainer" class="space-y-3 max-h-96 overflow-y-auto">
+                <!-- Stat config items will be added here -->
+            </div>
+
+            <button class="btn btn-outline btn-sm mt-4" onclick="addNewStatConfig()">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Add Stat
+            </button>
+
+            <div class="modal-action">
+                <button class="btn btn-primary" onclick="saveStatsConfig()">Save Configuration</button>
+                <form method="dialog">
+                    <button class="btn">Close</button>
+                </form>
+            </div>
+        </div>
+    </dialog>
+
+    <!-- Import Template Modal -->
+    <dialog id="importTemplateModal" class="modal">
+        <div class="modal-box">
+            <h3 class="font-bold text-lg">Import Template</h3>
+            <p class="py-4">Upload a template JSON file to configure your stats.</p>
+            <input type="file" id="templateFileInput" accept=".json" class="file-input file-input-bordered w-full" />
+            <div class="modal-action">
+                <button class="btn btn-primary" onclick="importTemplate()">Import</button>
+                <form method="dialog">
+                    <button class="btn">Cancel</button>
+                </form>
+            </div>
+        </div>
+    </dialog>
+
+    <!-- Import Data Modal -->
+    <dialog id="importDataModal" class="modal">
+        <div class="modal-box">
+            <h3 class="font-bold text-lg">Import Data</h3>
+            <p class="py-4">Upload a data JSON file to restore your entries.</p>
+            <input type="file" id="dataFileInput" accept=".json" class="file-input file-input-bordered w-full" />
+            <div class="modal-action">
+                <button class="btn btn-primary" onclick="importData()">Import</button>
+                <form method="dialog">
+                    <button class="btn">Cancel</button>
+                </form>
+            </div>
+        </div>
+    </dialog>
+
+    <script>
+        // ============================================
+        // STATE MANAGEMENT
+        // ============================================
+        let statsConfig = [];
+        let entriesData = [];
+        let currentChart = null;
+        let currentChartRange = 30; // Default to 30 days
+        let unitSystem = localStorage.getItem('unitSystem') || 'imperial';
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeApp();
+            setupEventListeners();
+        });
+
+        function initializeApp() {
+            // Load saved configuration and data
+            loadStatsConfig();
+            loadEntriesData();
+
+            // Set today's date
+            document.getElementById('dateInput').valueAsDate = new Date();
+
+            // Initialize UI
+            updateUnitUI();
+            renderStatInputs();
+            renderStatsConfigUI();
+            updateDashboardStats();
+            updateTableHeader();
+            updateTableBody();
+            updateChartSelector();
+
+            // Load theme preference
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        }
+
+        // ============================================
+        // UNIT CONVERSION HELPERS
+        // ============================================
+        const convert = {
+            cToF: (c) => (c * 9 / 5) + 32,
+            fToC: (f) => (f - 32) * 5 / 9,
+            kgToLbs: (kg) => kg * 2.20462,
+            lbsToKg: (lbs) => lbs / 2.20462
+        };
+
+        function setUnitSystem(system) {
+            unitSystem = system;
+            localStorage.setItem('unitSystem', system);
+            updateUnitUI();
+            renderStatInputs();
+            updateTableHeader();
+            updateTableBody();
+            updateChart();
+            showToast(`Switched to ${system} units`, 'info');
+        }
+
+        function updateUnitUI() {
+            const impBtn = document.getElementById('unitImperial');
+            const metBtn = document.getElementById('unitMetric');
+
+            if (unitSystem === 'imperial') {
+                impBtn.classList.add('btn-active');
+                metBtn.classList.remove('btn-active');
+            } else {
+                metBtn.classList.add('btn-active');
+                impBtn.classList.remove('btn-active');
+            }
+        }
+
+        function getDisplayUnit(stat) {
+            if (stat.category === 'temperature') return unitSystem === 'imperial' ? '°F' : '°C';
+            if (stat.category === 'weight') return unitSystem === 'imperial' ? 'lbs' : 'kg';
+            return stat.unit || '';
+        }
+
+        function setupEventListeners() {
+            // Save button
+            document.getElementById('saveButton').addEventListener('click', saveEntry);
+
+            // Chart selector
+            document.getElementById('chartSelector').addEventListener('change', (e) => {
+                updateChart(e.target.value);
+            });
+        }
+
+        // ============================================
+        // THEME MANAGEMENT
+        // ============================================
+        function changeTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            showToast(`Theme changed to ${theme.charAt(0).toUpperCase() + theme.slice(1)}`, 'success');
+        }
+
+        // ============================================
+        // STATS CONFIGURATION
+        // ============================================
+        function loadStatsConfig() {
+            const saved = localStorage.getItem('statsConfig');
+            if (saved) {
+                statsConfig = JSON.parse(saved);
+            } else {
+                // Default template
+                statsConfig = [
+                    { id: 'temp', name: 'Temperature', type: 'number', category: 'temperature', color: '#ef4444', min: 95, max: 105 },
+                    { id: 'weight', name: 'Weight', type: 'number', category: 'weight', color: '#f59e0b', min: 100, max: 250 },
+                    { id: 'heartRate', name: 'Heart Rate', type: 'number', category: 'standard', unit: 'bpm', color: '#ec4899', min: 40, max: 120 }
+                ];
+                saveStatsConfigToStorage();
+            }
+        }
+
+        function saveStatsConfigToStorage() {
+            localStorage.setItem('statsConfig', JSON.stringify(statsConfig));
+        }
+
+        function renderStatsConfigUI() {
+            const container = document.getElementById('statsConfigContainer');
+            container.innerHTML = '';
+
+            statsConfig.forEach((stat, index) => {
+                const div = document.createElement('div');
+                div.className = 'card bg-base-200 p-4';
+                div.innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="form-control">
+                            <label class="label"><span class="label-text font-bold">Name</span></label>
+                            <input type="text" value="${stat.name}" class="input input-sm input-bordered" 
+                                   onchange="updateStatConfig(${index}, 'name', this.value)" />
+                        </div>
+                        <div class="form-control">
+                            <label class="label"><span class="label-text font-bold">Category</span></label>
+                            <select class="select select-sm select-bordered" 
+                                    onchange="updateStatConfig(${index}, 'category', this.value)">
+                                <option value="standard" ${stat.category === 'standard' ? 'selected' : ''}>Standard</option>
+                                <option value="temperature" ${stat.category === 'temperature' ? 'selected' : ''}>Temperature</option>
+                                <option value="weight" ${stat.category === 'weight' ? 'selected' : ''}>Weight</option>
+                            </select>
+                        </div>
+                        <div class="form-control">
+                            <label class="label"><span class="label-text font-bold">Type</span></label>
+                            <select class="select select-sm select-bordered" 
+                                    onchange="handleTypeChange(${index}, this.value)">
+                                <option value="number" ${stat.type === 'number' ? 'selected' : ''}>Number</option>
+                                <option value="checkbox" ${stat.type === 'checkbox' ? 'selected' : ''}>Checkbox (Yes/No)</option>
+                                <option value="select" ${stat.type === 'select' ? 'selected' : ''}>Dropdown Selection</option>
+                                <option value="range" ${stat.type === 'range' ? 'selected' : ''}>Range Slider</option>
+                                <option value="text" ${stat.type === 'text' ? 'selected' : ''}>Short Text</option>
+                                <option value="textarea" ${stat.type === 'textarea' ? 'selected' : ''}>Long Notes</option>
+                                <option value="time" ${stat.type === 'time' ? 'selected' : ''}>Time</option>
+                            </select>
+                        </div>
+                        <div class="form-control">
+                            <label class="label"><span class="label-text font-bold">Color</span></label>
+                            <input type="color" value="${stat.color || '#3b82f6'}" class="input input-sm input-bordered h-10 w-full" 
+                                   onchange="updateStatConfig(${index}, 'color', this.value)" />
+                        </div>
+
+                        ${stat.type === 'select' ? `
+                        <div class="form-control md:col-span-2">
+                            <label class="label"><span class="label-text font-bold">Options (Comma separated)</span></label>
+                            <input type="text" value="${stat.options || ''}" placeholder="Option 1, Option 2, Option 3" 
+                                   class="input input-sm input-bordered" 
+                                   onchange="updateStatConfig(${index}, 'options', this.value)" />
+                        </div>
+                        ` : ''}
+
+                        ${stat.type === 'range' ? `
+                        <div class="form-control">
+                            <label class="label"><span class="label-text font-bold">Min</span></label>
+                            <input type="number" value="${stat.min ?? 0}" class="input input-sm input-bordered" 
+                                   onchange="updateStatConfig(${index}, 'min', parseFloat(this.value))" />
+                        </div>
+                        <div class="form-control">
+                            <label class="label"><span class="label-text font-bold">Max</span></label>
+                            <input type="number" value="${stat.max ?? 100}" class="input input-sm input-bordered" 
+                                   onchange="updateStatConfig(${index}, 'max', parseFloat(this.value))" />
+                        </div>
+                        ` : ''}
+                    </div>
+                    <div class="flex justify-end mt-4">
+                        <button class="btn btn-error btn-outline btn-xs" onclick="removeStatConfig(${index})">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                            Remove
+                        </button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function addNewStatConfig() {
+            const newStat = {
+                id: 'stat_' + Date.now(),
+                name: 'New Stat',
+                type: 'number',
+                unit: '',
+                color: '#3b82f6'
+            };
+            statsConfig.push(newStat);
+            renderStatsConfigUI();
+        }
+
+        function handleTypeChange(index, value) {
+            statsConfig[index].type = value;
+            // Add default values for specific types if they don't exist
+            if (value === 'select' && !statsConfig[index].options) statsConfig[index].options = '';
+            if (value === 'range') {
+                if (statsConfig[index].min === undefined) statsConfig[index].min = 0;
+                if (statsConfig[index].max === undefined) statsConfig[index].max = 100;
+            }
+            renderStatsConfigUI();
+        }
+
+        function updateStatConfig(index, field, value) {
+            statsConfig[index][field] = value;
+        }
+
+        function removeStatConfig(index) {
+            if (confirm('Are you sure you want to remove this stat?')) {
+                statsConfig.splice(index, 1);
+                renderStatsConfigUI();
+            }
+        }
+
+        function saveStatsConfig() {
+            saveStatsConfigToStorage();
+            renderStatInputs();
+            updateChartSelector();
+            updateTableHeader();
+            updateTableBody();
+            manageTemplateModal.close();
+            showToast('Configuration saved successfully!', 'success');
+        }
+
+        // ============================================
+        // STAT INPUTS RENDERING
+        // ============================================
+        function renderStatInputs() {
+            const container = document.getElementById('statInputsContainer');
+            container.innerHTML = '';
+
+            statsConfig.forEach(stat => {
+                const div = document.createElement('div');
+                div.className = 'form-control w-full';
+
+                const displayUnit = getDisplayUnit(stat);
+                const label = document.createElement('label');
+                label.className = 'label';
+                label.innerHTML = `<span class="label-text font-semibold">${stat.name} ${displayUnit ? `(${displayUnit})` : ''}</span>`;
+
+                let input;
+                if (stat.type === 'number') {
+                    input = document.createElement('input');
+                    input.type = 'number';
+                    input.step = 'any';
+                    input.className = 'input input-bordered stat-input';
+                    input.placeholder = `Enter ${stat.name.toLowerCase()}`;
+                } else if (stat.type === 'checkbox') {
+                    const cbContainer = document.createElement('div');
+                    cbContainer.className = 'flex items-center gap-4 bg-base-200 p-3 rounded-lg mt-1';
+
+                    input = document.createElement('input');
+                    input.type = 'checkbox';
+                    input.className = 'checkbox checkbox-primary';
+
+                    const span = document.createElement('span');
+                    span.className = 'label-text';
+                    span.textContent = 'Yes / Active';
+
+                    cbContainer.appendChild(input);
+                    cbContainer.appendChild(span);
+
+                    input.id = `stat_${stat.id}`;
+                    div.appendChild(label);
+                    div.appendChild(cbContainer);
+                    container.appendChild(div);
+                    return; // Skip standard appendage
+                } else if (stat.type === 'select') {
+                    input = document.createElement('select');
+                    input.className = 'select select-bordered w-full';
+                    const defaultOpt = document.createElement('option');
+                    defaultOpt.disabled = true;
+                    defaultOpt.selected = true;
+                    defaultOpt.textContent = `Select ${stat.name.toLowerCase()}`;
+                    input.appendChild(defaultOpt);
+
+                    const options = (stat.options || '').split(',').map(o => o.trim()).filter(o => o);
+                    options.forEach(opt => {
+                        const o = document.createElement('option');
+                        o.value = opt;
+                        o.textContent = opt;
+                        input.appendChild(o);
+                    });
+                } else if (stat.type === 'range') {
+                    const rangeContainer = document.createElement('div');
+                    rangeContainer.className = 'space-y-2 px-1';
+
+                    input = document.createElement('input');
+                    input.type = 'range';
+                    input.min = stat.min ?? 0;
+                    input.max = stat.max ?? 100;
+                    input.className = 'range range-primary range-sm';
+
+                    const scale = document.createElement('div');
+                    scale.className = 'flex justify-between text-xs opacity-70';
+                    scale.innerHTML = `<span>${input.min}</span><span>${input.max}</span>`;
+
+                    const valueDisplay = document.createElement('div');
+                    valueDisplay.className = 'text-center font-bold text-primary';
+                    valueDisplay.textContent = 'Value: ' + (parseFloat(input.min) + parseFloat(input.max)) / 2;
+
+                    input.oninput = (e) => valueDisplay.textContent = 'Value: ' + e.target.value;
+
+                    rangeContainer.appendChild(input);
+                    rangeContainer.appendChild(scale);
+                    rangeContainer.appendChild(valueDisplay);
+
+                    input.id = `stat_${stat.id}`;
+                    div.appendChild(label);
+                    div.appendChild(rangeContainer);
+                    container.appendChild(div);
+                    return;
+                } else if (stat.type === 'textarea') {
+                    input = document.createElement('textarea');
+                    input.className = 'textarea textarea-bordered h-24';
+                    input.placeholder = `Enter ${stat.name.toLowerCase()} notes...`;
+                } else if (stat.type === 'time') {
+                    input = document.createElement('input');
+                    input.type = 'time';
+                    input.className = 'input input-bordered';
+                } else {
+                    input = document.createElement('input');
+                    input.type = 'text';
+                    input.className = 'input input-bordered stat-input';
+                    input.placeholder = `Enter ${stat.name.toLowerCase()}`;
+                }
+
+                input.id = `stat_${stat.id}`;
+                div.appendChild(label);
+                div.appendChild(input);
+                container.appendChild(div);
+            });
+        }
+
+        // ============================================
+        // DATA MANAGEMENT
+        // ============================================
+        function loadEntriesData() {
+            const saved = localStorage.getItem('entriesData');
+            if (saved) {
+                entriesData = JSON.parse(saved);
+            }
+        }
+
+        function saveEntriesData() {
+            localStorage.setItem('entriesData', JSON.stringify(entriesData));
+        }
+
+        function saveEntry() {
+            const date = document.getElementById('dateInput').value;
+            if (!date) {
+                showToast('Please select a date', 'error');
+                return;
+            }
+
+            const entry = { date };
+            let hasData = false;
+
+            statsConfig.forEach(stat => {
+                const input = document.getElementById(`stat_${stat.id}`);
+                if (input) {
+                    let val;
+                    if (stat.type === 'checkbox') {
+                        val = input.checked;
+                    } else if (stat.type === 'number' || stat.type === 'range') {
+                        const rawVal = input.value;
+                        if (rawVal === '') return;
+                        val = parseFloat(rawVal);
+                        if (isNaN(val)) return;
+                    } else {
+                        val = input.value;
+                    }
+
+                    if (val !== '' && val !== undefined && val !== null) {
+                        // Convert to base units (Imperial) for storage if input was Metric
+                        if (stat.type === 'number' && unitSystem === 'metric') {
+                            if (stat.category === 'temperature') val = convert.cToF(val);
+                            else if (stat.category === 'weight') val = convert.kgToLbs(val);
+                        }
+
+                        entry[stat.id] = val;
+                        hasData = true;
+                    }
+                }
+            });
+
+            if (!hasData) {
+                showToast('Please enter at least one stat value', 'warning');
+                return;
+            }
+
+            // Check if entry for this date exists
+            const existingIndex = entriesData.findIndex(e => e.date === date);
+            if (existingIndex >= 0) {
+                if (confirm('An entry for this date already exists. Overwrite?')) {
+                    entriesData[existingIndex] = entry;
+                } else {
+                    return;
+                }
+            } else {
+                entriesData.push(entry);
+            }
+
+            // Sort by date
+            entriesData.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            saveEntriesData();
+            clearInputs();
+            updateDashboardStats();
+            updateTableBody();
+            updateChart();
+            showToast('Entry saved successfully!', 'success');
+        }
+
+        function clearInputs() {
+            statsConfig.forEach(stat => {
+                const input = document.getElementById(`stat_${stat.id}`);
+                if (input) input.value = '';
+            });
+            document.getElementById('dateInput').valueAsDate = new Date();
+        }
+
+        function deleteEntry(date) {
+            if (confirm('Are you sure you want to delete this entry?')) {
+                entriesData = entriesData.filter(e => e.date !== date);
+                saveEntriesData();
+                updateDashboardStats();
+                updateTableBody();
+                updateChart();
+                showToast('Entry deleted', 'info');
+            }
+        }
+
+        // ============================================
+        // UI UPDATES
+        // ============================================
+        function updateDashboardStats() {
+            document.getElementById('totalEntries').textContent = entriesData.length;
+            document.getElementById('activeStats').textContent = statsConfig.length;
+
+            if (entriesData.length > 0) {
+                const lastDate = new Date(entriesData[0].date);
+                document.getElementById('lastEntry').textContent = lastDate.toLocaleDateString();
+            } else {
+                document.getElementById('lastEntry').textContent = 'Never';
+            }
+        }
+
+        function updateTableHeader() {
+            const header = document.getElementById('tableHeader');
+            header.innerHTML = '<th>Date</th>';
+
+            statsConfig.forEach(stat => {
+                const th = document.createElement('th');
+                const displayUnit = getDisplayUnit(stat);
+                th.textContent = `${stat.name} ${displayUnit ? `(${displayUnit})` : ''}`;
+                header.appendChild(th);
+            });
+
+            header.innerHTML += '<th>Actions</th>';
+        }
+
+        function updateTableBody() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            const recentEntries = entriesData.slice(0, 10);
+
+            recentEntries.forEach(entry => {
+                const tr = document.createElement('tr');
+
+                // Date cell
+                const dateCell = document.createElement('td');
+                dateCell.textContent = new Date(entry.date).toLocaleDateString();
+                tr.appendChild(dateCell);
+
+                // Stat cells
+                statsConfig.forEach(stat => {
+                    const td = document.createElement('td');
+                    let rawVal = entry[stat.id];
+                    let displayVal = rawVal !== undefined ? rawVal : '-';
+
+                    if (rawVal !== undefined) {
+                        if (stat.type === 'number' && unitSystem === 'metric') {
+                            if (stat.category === 'temperature') displayVal = convert.fToC(rawVal).toFixed(1);
+                            else if (stat.category === 'weight') displayVal = convert.lbsToKg(rawVal).toFixed(1);
+                            else displayVal = Number(rawVal).toFixed(1);
+                        } else if (stat.type === 'number' || stat.type === 'range') {
+                            displayVal = Number(rawVal).toFixed(1);
+                        } else if (stat.type === 'checkbox') {
+                            displayVal = rawVal ? '✅ Yes' : '❌ No';
+                        }
+                    }
+
+                    td.textContent = displayVal;
+                    tr.appendChild(td);
+                });
+
+                // Actions cell
+                const actionsCell = document.createElement('td');
+                actionsCell.innerHTML = `
+                    <button class="btn btn-error btn-xs" onclick="deleteEntry('${entry.date}')">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                `;
+                tr.appendChild(actionsCell);
+
+                tbody.appendChild(tr);
+            });
+
+            if (recentEntries.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="100" class="text-center opacity-50">No entries yet</td></tr>';
+            }
+        }
+
+        // ============================================
+        // CHART MANAGEMENT
+        // ============================================
+        function updateChartSelector() {
+            const selector = document.getElementById('chartSelector');
+            selector.innerHTML = '<option disabled selected>Select a stat to visualize</option>';
+
+            const chartableTypes = ['number', 'range', 'checkbox'];
+            statsConfig.filter(s => chartableTypes.includes(s.type)).forEach(stat => {
+                const option = document.createElement('option');
+                option.value = stat.id;
+                option.textContent = `${stat.name} ${stat.unit ? `(${stat.unit})` : ''}`;
+                selector.appendChild(option);
+            });
+        }
+
+        function updateChart(statId) {
+            if (!statId) {
+                statId = document.getElementById('chartSelector').value;
+            }
+
+            if (!statId || statId === 'Select a stat to visualize') return;
+
+            const stat = statsConfig.find(s => s.id === statId);
+            if (!stat) return;
+
+            // Filter data by date range
+            let filteredData = entriesData;
+            if (currentChartRange > 0) {
+                const cutoffDate = new Date();
+                cutoffDate.setDate(cutoffDate.getDate() - currentChartRange);
+                filteredData = entriesData.filter(e => new Date(e.date) >= cutoffDate);
+            }
+
+            // Prepare chart data with unit conversion
+            const labels = filteredData.map(e => new Date(e.date).toLocaleDateString()).reverse();
+            const data = filteredData.map(e => {
+                let val = e[statId];
+                if (val !== undefined && unitSystem === 'metric') {
+                    if (stat.category === 'temperature') return convert.fToC(val);
+                    if (stat.category === 'weight') return convert.lbsToKg(val);
+                }
+                return val;
+            }).reverse();
+
+            // Destroy existing chart
+            if (currentChart) {
+                currentChart.destroy();
+            }
+
+            // Create new chart
+            const ctx = document.getElementById('mainChart').getContext('2d');
+            currentChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: `${stat.name} ${stat.unit ? `(${stat.unit})` : ''}`,
+                        data: data,
+                        borderColor: stat.color,
+                        backgroundColor: stat.color + '20',
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateChartRange(days) {
+            currentChartRange = days;
+            updateChart();
+        }
+
+        // ============================================
+        // IMPORT/EXPORT
+        // ============================================
+        function exportTemplate() {
+            const dataStr = JSON.stringify(statsConfig, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'stat-logger-template.json';
+            link.click();
+            showToast('Template exported!', 'success');
+        }
+
+        function importTemplate() {
+            const fileInput = document.getElementById('templateFileInput');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                showToast('Please select a file', 'warning');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (Array.isArray(imported)) {
+                        statsConfig = imported;
+                        saveStatsConfigToStorage();
+                        renderStatInputs();
+                        renderStatsConfigUI();
+                        updateChartSelector();
+                        updateTableHeader();
+                        updateTableBody();
+                        importTemplateModal.close();
+                        showToast('Template imported successfully!', 'success');
+                    } else {
+                        showToast('Invalid template format', 'error');
+                    }
+                } catch (err) {
+                    showToast('Error parsing template file', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function exportData() {
+            const dataStr = JSON.stringify(entriesData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'stat-logger-data.json';
+            link.click();
+            showToast('Data exported!', 'success');
+        }
+
+        function importData() {
+            const fileInput = document.getElementById('dataFileInput');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                showToast('Please select a file', 'warning');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (Array.isArray(imported)) {
+                        if (confirm('This will replace your current data. Continue?')) {
+                            entriesData = imported;
+                            saveEntriesData();
+                            updateDashboardStats();
+                            updateTableBody();
+                            updateChart();
+                            importDataModal.close();
+                            showToast('Data imported successfully!', 'success');
+                        }
+                    } else {
+                        showToast('Invalid data format', 'error');
+                    }
+                } catch (err) {
+                    showToast('Error parsing data file', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // ============================================
+        // UTILITIES
+        // ============================================
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `alert alert-${type} fixed bottom-4 right-4 w-auto max-w-sm shadow-lg z-50`;
+            toast.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>${message}</span>
+            `;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+    </script>
+
+</body>
+
+</html>

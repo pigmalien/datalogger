@@ -1,0 +1,54 @@
+[
+    {
+        "id": "weight",
+        "name": "Weight",
+        "type": "number",
+        "unit": "lbs",
+        "color": "#3b82f6",
+        "min": 100,
+        "max": 300
+    },
+    {
+        "id": "steps",
+        "name": "Steps",
+        "type": "number",
+        "unit": "steps",
+        "color": "#10b981",
+        "min": 0,
+        "max": 30000
+    },
+    {
+        "id": "calories",
+        "name": "Calories",
+        "type": "number",
+        "unit": "kcal",
+        "color": "#f59e0b",
+        "min": 0,
+        "max": 5000
+    },
+    {
+        "id": "water",
+        "name": "Water",
+        "type": "number",
+        "unit": "oz",
+        "color": "#06b6d4",
+        "min": 0,
+        "max": 200
+    },
+    {
+        "id": "sleep",
+        "name": "Sleep",
+        "type": "number",
+        "unit": "hours",
+        "color": "#8b5cf6",
+        "min": 0,
+        "max": 12
+    },
+    {
+        "id": "workout",
+        "name": "Workout",
+        "type": "text",
+        "unit": "",
+        "color": "#f97316"
+    }
+]

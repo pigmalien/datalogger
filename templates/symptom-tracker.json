@@ -1,0 +1,37 @@
+[
+    {
+        "id": "painLevel",
+        "name": "Pain Level",
+        "type": "number",
+        "unit": "1-10",
+        "color": "#e11d48"
+    },
+    {
+        "id": "fatigue",
+        "name": "Fatigue",
+        "type": "number",
+        "unit": "1-10",
+        "color": "#7c3aed"
+    },
+    {
+        "id": "shortnessOfBreath",
+        "name": "Shortness of Breath",
+        "type": "number",
+        "unit": "1-10",
+        "color": "#2563eb"
+    },
+    {
+        "id": "swelling",
+        "name": "Swelling/Edema",
+        "type": "number",
+        "unit": "1-5",
+        "color": "#0891b2"
+    },
+    {
+        "id": "symptomNotes",
+        "name": "Notes",
+        "type": "text",
+        "unit": "",
+        "color": "#4b5563"
+    }
+]
