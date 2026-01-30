@@ -406,7 +406,7 @@
             loadEntriesData();
 
             // Set today's date
-            document.getElementById('dateInput').valueAsDate = new Date();
+            document.getElementById('dateInput').value = dateUtils.getToday();
 
             // Initialize UI
             updateUnitUI();
@@ -430,6 +430,21 @@
             fToC: (f) => (f - 32) * 5 / 9,
             kgToLbs: (kg) => kg * 2.20462,
             lbsToKg: (lbs) => lbs / 2.20462
+        };
+
+        const dateUtils = {
+            getToday: () => {
+                const now = new Date();
+                return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+            },
+            parseLocal: (dateStr) => {
+                const parts = dateStr.split('-');
+                if (parts.length !== 3) return new Date(dateStr);
+                return new Date(parts[0], parts[1] - 1, parts[2]);
+            },
+            toDisplayDate: (dateStr) => {
+                return dateUtils.parseLocal(dateStr).toLocaleDateString();
+            }
         };
 
         function setUnitSystem(system) {
@@ -802,7 +817,7 @@
             }
 
             // Sort by date
-            entriesData.sort((a, b) => new Date(b.date) - new Date(a.date));
+            entriesData.sort((a, b) => dateUtils.parseLocal(b.date) - dateUtils.parseLocal(a.date));
 
             saveEntriesData();
             clearInputs();
@@ -817,7 +832,7 @@
                 const input = document.getElementById(`stat_${stat.id}`);
                 if (input) input.value = '';
             });
-            document.getElementById('dateInput').valueAsDate = new Date();
+            document.getElementById('dateInput').value = dateUtils.getToday();
         }
 
         function deleteEntry(date) {
@@ -839,8 +854,7 @@
             document.getElementById('activeStats').textContent = statsConfig.length;
 
             if (entriesData.length > 0) {
-                const lastDate = new Date(entriesData[0].date);
-                document.getElementById('lastEntry').textContent = lastDate.toLocaleDateString();
+                document.getElementById('lastEntry').textContent = dateUtils.toDisplayDate(entriesData[0].date);
             } else {
                 document.getElementById('lastEntry').textContent = 'Never';
             }
@@ -871,7 +885,7 @@
 
                 // Date cell
                 const dateCell = document.createElement('td');
-                dateCell.textContent = new Date(entry.date).toLocaleDateString();
+                dateCell.textContent = dateUtils.toDisplayDate(entry.date);
                 tr.appendChild(dateCell);
 
                 // Stat cells
@@ -943,12 +957,13 @@
             let filteredData = entriesData;
             if (currentChartRange > 0) {
                 const cutoffDate = new Date();
+                cutoffDate.setHours(0, 0, 0, 0); // Start of today
                 cutoffDate.setDate(cutoffDate.getDate() - currentChartRange);
-                filteredData = entriesData.filter(e => new Date(e.date) >= cutoffDate);
+                filteredData = entriesData.filter(e => dateUtils.parseLocal(e.date) >= cutoffDate);
             }
 
             // Prepare chart data with unit conversion
-            const labels = filteredData.map(e => new Date(e.date).toLocaleDateString()).reverse();
+            const labels = filteredData.map(e => dateUtils.toDisplayDate(e.date)).reverse();
             const data = filteredData.map(e => {
                 let val = e[statId];
                 if (val === undefined || val === null || val === '') return null;
