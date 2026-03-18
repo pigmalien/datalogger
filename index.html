@@ -264,17 +264,19 @@
                     </div>
 
                     <!-- Chart Header (Fixed Status) -->
-                    <div id="chartLegend" class="flex items-center justify-center gap-2 mb-2 p-2 bg-base-200 rounded-lg text-sm font-medium">
+                    <div id="chartLegend"
+                        class="flex items-center justify-center gap-2 mb-2 p-2 bg-base-200 rounded-lg text-sm font-medium">
                         <!-- Legend content will be injected by JS -->
                     </div>
 
                     <!-- Chart Area (Fixed Y-axis + Scrollable Graph) -->
-                    <div class="flex items-stretch h-[320px] bg-base-100 rounded-lg overflow-hidden border border-base-200 relative">
+                    <div
+                        class="flex items-stretch h-[320px] bg-base-100 rounded-lg overflow-hidden border border-base-100 relative">
                         <!-- Pinned Y-Axis -->
-                        <div class="w-14 flex-none bg-base-100 z-10 border-r border-base-200 relative h-full">
+                        <div class="w-16 flex-none bg-base-100 z-10 relative h-full">
                             <canvas id="yAxisChart"></canvas>
                         </div>
-                        
+
                         <!-- Scrollable Graph -->
                         <div class="chart-container flex-1 h-full overflow-x-auto overflow-y-hidden">
                             <div id="chartWrapper" class="h-full min-w-full relative">
@@ -972,9 +974,10 @@
             const stat = statsConfig.find(s => s.id === statId);
             if (!stat) return;
 
-            // Prepare chart data with unit conversion (Explicitly sorted Oldest -> Newest)
+            // Prepare chart data (Explicitly sorted Oldest -> Newest)
             const chartData = [...entriesData].sort((a, b) => dateUtils.parseLocal(a.date) - dateUtils.parseLocal(b.date));
-            const labels = chartData.map(e => dateUtils.toDisplayDate(e.date));
+            const labels = chartData.map(e => dateUtils.parseLocal(e.date).toLocaleDateString('en-US', { weekday: 'short' }));
+            const fullDates = chartData.map(e => dateUtils.toDisplayDate(e.date)); // Keep for tooltip
             const data = chartData.map(e => {
                 let val = e[statId];
                 if (val === undefined || val === null || val === '') return null;
@@ -1046,17 +1049,23 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    layout: { padding: { top: 10, bottom: 32 } }, // Bottom padding matches X axis height approx
+                    layout: { padding: { top: 10, left: 0, right: 0, bottom: 32 } },
                     plugins: { legend: { display: false }, tooltip: { enabled: false } },
                     scales: {
                         x: { display: false },
                         y: {
                             ...ySettings,
                             display: true,
+                            position: 'right',
+                            border: { display: false }, // Remove vertical rule
                             grid: { display: false },
-                            ticks: { 
+                            ticks: {
                                 font: { size: 10 },
-                                color: 'gray'
+                                color: '#999',
+                                padding: 5,
+                                callback: function (value) {
+                                    return value >= 1000 ? (value / 1000).toFixed(1) + 'k' : value;
+                                }
                             }
                         }
                     }
@@ -1085,7 +1094,7 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    layout: { padding: { top: 10, bottom: 0 } },
+                    layout: { padding: { top: 10, left: 0, bottom: 0, right: 30 } },
                     interaction: {
                         intersect: false,
                         mode: 'index',
@@ -1100,6 +1109,10 @@
                             borderWidth: 1,
                             padding: 10,
                             callbacks: {
+                                title: function(context) {
+                                    // Show full date in tooltip title
+                                    return fullDates[context[0].dataIndex];
+                                },
                                 label: function (context) {
                                     let label = context.dataset.label || '';
                                     if (label) label += ': ';
@@ -1112,10 +1125,22 @@
                     scales: {
                         y: {
                             ...ySettings,
-                            display: false, // Hidden here as it's pinned on the left
+                            display: true,
+                            position: 'left',
+                            ticks: { display: false },
+                            border: { display: false }, // Also remove border here for seamless look
+                            grid: {
+                                display: true,
+                                color: 'rgba(0, 0, 0, 0.05)',
+                                drawTicks: false
+                            }
                         },
                         x: {
-                            grid: { display: false },
+                            grid: {
+                                display: true,
+                                color: 'rgba(0, 0, 0, 0.05)',
+                                drawTicks: true
+                            },
                             ticks: { font: { size: 10 } }
                         }
                     }
