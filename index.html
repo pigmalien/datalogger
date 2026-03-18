@@ -273,7 +273,7 @@
                     <div
                         class="flex items-stretch h-[320px] bg-base-100 rounded-lg overflow-hidden border border-base-100 relative">
                         <!-- Pinned Y-Axis -->
-                        <div class="w-16 flex-none bg-base-100 z-10 relative h-full">
+                        <div class="w-16 flex-none bg-base-100 z-20 relative h-full border-r border-base-200">
                             <canvas id="yAxisChart"></canvas>
                         </div>
 
@@ -1049,7 +1049,7 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    layout: { padding: { top: 10, left: 5, right: 0, bottom: 32 } },
+                    layout: { padding: { top: 10, left: 0, right: 0, bottom: 32 } },
                     plugins: { legend: { display: false }, tooltip: { enabled: false } },
                     scales: {
                         x: { display: false },
@@ -1057,12 +1057,16 @@
                             ...ySettings,
                             display: true,
                             position: 'left',
+                            afterFit: function(scale) {
+                                scale.width = 60; // Force full width to remove gap
+                            },
                             border: { display: false }, // Remove vertical rule
                             grid: { display: false },
                             ticks: {
                                 font: { size: 10 },
                                 color: '#999',
-                                padding: 5,
+                                padding: 4,
+                                crossAlign: 'far', // Align numbers close to the graph
                                 callback: function (value) {
                                     return value >= 1000 ? (value / 1000).toFixed(1) + 'k' : value;
                                 }
@@ -1127,6 +1131,9 @@
                             ...ySettings,
                             display: true,
                             position: 'left',
+                            afterFit: function(scale) {
+                                scale.width = 0; // Remove space reserved for hidden scale
+                            },
                             ticks: { display: false },
                             border: { display: false }, // Also remove border here for seamless look
                             grid: {
