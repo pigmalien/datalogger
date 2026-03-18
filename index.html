@@ -38,7 +38,7 @@
         }
 
         .chart-wrapper {
-            height: 300px;
+            height: 100%;
             min-width: 100%;
         }
 
@@ -269,15 +269,15 @@
                     </div>
 
                     <!-- Chart Area (Fixed Y-axis + Scrollable Graph) -->
-                    <div class="flex items-stretch h-[320px] bg-base-100 rounded-lg overflow-hidden border border-base-200">
+                    <div class="flex items-stretch h-[320px] bg-base-100 rounded-lg overflow-hidden border border-base-200 relative">
                         <!-- Pinned Y-Axis -->
-                        <div class="w-14 flex-none py-2 bg-base-100 z-10 border-r border-base-200 relative">
+                        <div class="w-14 flex-none bg-base-100 z-10 border-r border-base-200 relative h-full">
                             <canvas id="yAxisChart"></canvas>
                         </div>
                         
                         <!-- Scrollable Graph -->
-                        <div class="chart-container flex-1 py-2">
-                            <div id="chartWrapper" class="chart-wrapper">
+                        <div class="chart-container flex-1 h-full overflow-x-auto overflow-y-hidden">
+                            <div id="chartWrapper" class="h-full min-w-full relative">
                                 <canvas id="mainChart"></canvas>
                             </div>
                         </div>
@@ -991,9 +991,9 @@
 
             // Resize Wrapper for scrolling based on data points
             const wrapper = document.getElementById('chartWrapper');
-            const minSpacing = 60; // minimum pixels per data point
+            const minSpacing = 45; // reduced for mobile/small screen compatibility
             const calculatedWidth = labels.length * minSpacing;
-            const containerWidth = wrapper.parentElement.clientWidth;
+            const containerWidth = wrapper.parentElement.clientWidth || window.innerWidth;
             wrapper.style.width = Math.max(calculatedWidth, containerWidth) + 'px';
 
             // Destroy existing chart
