@@ -136,10 +136,6 @@ A: Use the unit toggle in the navigation bar for Temperature and Weight. For oth
 **Q: Can I track non-numeric data?**
 A: Yes! Set stat type to "text", "textarea", or "select" for notes, medications, or categorical data.
 
-## 📄 License
-
-Free to use for personal tracking.
-
 ---
 
 **Disclaimer**: This is a tracking tool only. Always consult with a professional for any critical data interpretation.
