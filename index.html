@@ -77,7 +77,7 @@
         <div class="flex-1">
             <a
                 class="btn btn-ghost text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent px-2">
-                📊 Stat Logger
+                Stat Logger
             </a>
         </div>
         <div class="flex-none gap-1 sm:gap-2">
@@ -273,7 +273,7 @@
                     <div
                         class="flex items-stretch h-[320px] bg-base-100 rounded-lg overflow-hidden border border-base-100 relative">
                         <!-- Pinned Y-Axis -->
-                        <div class="w-16 flex-none bg-base-100 z-20 relative h-full border-r border-base-200">
+                        <div class="w-12 flex-none bg-base-100 z-20 relative h-full border-r border-base-200">
                             <canvas id="yAxisChart"></canvas>
                         </div>
 
@@ -334,7 +334,7 @@
             </div>
         </nav>
         <aside>
-            <p class="font-medium">📊 Stat Logger — Your personal data tracking companion</p>
+            <p class="font-medium">Stat Logger — Your personal data tracking companion</p>
             <p class="opacity-50 text-xs">© 2026 Developed with ❤️ for productivity</p>
         </aside>
     </footer>
@@ -1040,6 +1040,19 @@
                 max: yMax
             };
 
+            // Sync scales by calculating bounds from data if not explicitly set in config
+            const validValues = data.filter(v => v !== null && !isNaN(v));
+            if (validValues.length > 0) {
+                if (ySettings.min === undefined) {
+                    const dataMin = Math.min(...validValues);
+                    ySettings.min = ySettings.beginAtZero ? 0 : dataMin * 0.98;
+                }
+                if (ySettings.max === undefined) {
+                    const dataMax = Math.max(...validValues);
+                    ySettings.max = dataMax * 1.02;
+                }
+            }
+
             // Build/Update Pinned Y-Axis Chart
             if (yAxisChart) yAxisChart.destroy();
             const yCtx = document.getElementById('yAxisChart').getContext('2d');
@@ -1047,6 +1060,7 @@
                 type: 'line',
                 data: { datasets: [] },
                 options: {
+                    animation: false,
                     responsive: true,
                     maintainAspectRatio: false,
                     layout: { padding: { top: 10, left: 0, right: 0, bottom: 32 } },
@@ -1058,14 +1072,14 @@
                             display: true,
                             position: 'left',
                             afterFit: function(scale) {
-                                scale.width = 60; // Force full width to remove gap
+                                scale.width = 48; // Match container width (w-12 = 48px)
                             },
                             border: { display: false }, // Remove vertical rule
                             grid: { display: false },
                             ticks: {
                                 font: { size: 10 },
                                 color: '#999',
-                                padding: 4,
+                                padding: 2,
                                 crossAlign: 'far', // Align numbers close to the graph
                                 callback: function (value) {
                                     return value >= 1000 ? (value / 1000).toFixed(1) + 'k' : value;
@@ -1096,9 +1110,10 @@
                     }]
                 },
                 options: {
+                    animation: false,
                     responsive: true,
                     maintainAspectRatio: false,
-                    layout: { padding: { top: 10, left: 0, bottom: 0, right: window.innerWidth < 640 ? 10 : 30 } },
+                    layout: { padding: { top: 10, left: 0, bottom: 0, right: 10 } },
                     interaction: {
                         intersect: false,
                         mode: 'index',
@@ -1284,7 +1299,7 @@
         // ============================================
         function showToast(message, type = 'info') {
             const toast = document.createElement('div');
-            toast.className = `alert alert-${type} fixed bottom-4 right-4 w-auto max-w-sm shadow-lg z-50`;
+            toast.className = `alert alert-${type} fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-auto max-w-sm shadow-lg z-50`;
             toast.innerHTML = `
                 <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 <span>${message}</span>
