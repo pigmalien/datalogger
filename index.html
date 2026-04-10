@@ -514,6 +514,10 @@
         function changeTheme(theme) {
             document.documentElement.setAttribute('data-theme', theme);
             localStorage.setItem('theme', theme);
+            // Refresh chart to apply new theme colors to tooltip and axes
+            if (document.getElementById('chartSelector').value !== 'Select a stat to visualize') {
+                updateChart();
+            }
             showToast(`Theme changed to ${theme.charAt(0).toUpperCase() + theme.slice(1)}`, 'success');
         }
 
@@ -974,6 +978,13 @@
             const stat = statsConfig.find(s => s.id === statId);
             if (!stat) return;
 
+            // Get theme colors from computed styles
+            const themeStyles = getComputedStyle(document.documentElement);
+            const isDark = document.documentElement.getAttribute('data-theme').includes('dark') || 
+                           ['black', 'luxury', 'dracula', 'business', 'night', 'coffee', 'dim', 'sunset'].includes(document.documentElement.getAttribute('data-theme'));
+            const axisColor = isDark ? '#9ca3af' : '#6b7280'; // gray-400 : gray-500
+            const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)';
+
             // Prepare chart data (Explicitly sorted Oldest -> Newest)
             const chartData = [...entriesData].sort((a, b) => dateUtils.parseLocal(a.date) - dateUtils.parseLocal(b.date));
             const labels = chartData.map(e => dateUtils.parseLocal(e.date).toLocaleDateString('en-US', { weekday: 'short' }));
@@ -1077,8 +1088,8 @@
                             border: { display: false }, // Remove vertical rule
                             grid: { display: false },
                             ticks: {
-                                font: { size: 10 },
-                                color: '#999',
+                                font: { size: 11, weight: '500' },
+                                color: axisColor,
                                 padding: 2,
                                 crossAlign: 'far', // Align numbers close to the graph
                                 callback: function (value) {
@@ -1121,10 +1132,11 @@
                     plugins: {
                         legend: { display: false },
                         tooltip: {
-                            backgroundColor: 'rgba(0, 0, 0, 0.1)',
-                            titleColor: '#666',
-                            bodyColor: '#666',
-                            borderColor: 'rgba(0, 0, 0, 0.1)',
+                            yAlign: 'bottom',
+                            backgroundColor: isDark ? '#1f2937' : '#ffffff',
+                            titleColor: isDark ? '#f3f4f6' : '#1f2937',
+                            bodyColor: isDark ? '#f3f4f6' : '#1f2937',
+                            borderColor: stat.color,
                             borderWidth: 1,
                             padding: 10,
                             callbacks: {
@@ -1153,17 +1165,20 @@
                             border: { display: false }, // Also remove border here for seamless look
                             grid: {
                                 display: true,
-                                color: 'rgba(0, 0, 0, 0.05)',
+                                color: gridColor,
                                 drawTicks: false
                             }
                         },
                         x: {
                             grid: {
                                 display: true,
-                                color: 'rgba(0, 0, 0, 0.05)',
+                                color: gridColor,
                                 drawTicks: true
                             },
-                            ticks: { font: { size: 10 } }
+                            ticks: { 
+                                font: { size: 10 },
+                                color: axisColor
+                            }
                         }
                     }
                 }
