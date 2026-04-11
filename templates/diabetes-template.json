@@ -3,6 +3,7 @@
         "id": "glucose",
         "name": "Blood Glucose",
         "type": "number",
+        "category": "standard",
         "unit": "mg/dL",
         "color": "#ef4444",
         "min": 40,
@@ -12,6 +13,7 @@
         "id": "insulin",
         "name": "Insulin Dose",
         "type": "number",
+        "category": "standard",
         "unit": "units",
         "color": "#3b82f6",
         "min": 0,
@@ -21,6 +23,7 @@
         "id": "carbs",
         "name": "Carbohydrates",
         "type": "number",
+        "category": "standard",
         "unit": "g",
         "color": "#f59e0b",
         "min": 0,
@@ -30,6 +33,7 @@
         "id": "mealType",
         "name": "Meal Type",
         "type": "text",
+        "category": "standard",
         "unit": "",
         "color": "#10b981"
     },
@@ -37,6 +41,7 @@
         "id": "notes",
         "name": "Notes",
         "type": "text",
+        "category": "standard",
         "unit": "",
         "color": "#6b7280"
     }

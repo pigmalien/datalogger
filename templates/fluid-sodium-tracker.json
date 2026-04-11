@@ -3,6 +3,7 @@
         "id": "fluidIn",
         "name": "Fluid Intake",
         "type": "number",
+        "category": "standard",
         "unit": "oz",
         "color": "#0ea5e9"
     },
@@ -10,6 +11,7 @@
         "id": "sodium",
         "name": "Sodium",
         "type": "number",
+        "category": "standard",
         "unit": "mg",
         "color": "#f43f5e"
     },
@@ -17,6 +19,7 @@
         "id": "caffeine",
         "name": "Caffeine",
         "type": "number",
+        "category": "standard",
         "unit": "mg",
         "color": "#92400e"
     },
@@ -24,6 +27,7 @@
         "id": "fluidNotes",
         "name": "Notes",
         "type": "text",
+        "category": "standard",
         "unit": "",
         "color": "#64748b"
     }

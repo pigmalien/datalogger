@@ -7,8 +7,7 @@
     <title>Stat Logger</title>
 
     <!-- DaisyUI + Tailwind CSS -->
-    <link href="assets/css/daisyui.min.css" rel="stylesheet" type="text/css" />
-    <script src="assets/js/tailwind.min.js"></script>
+    <link href="assets/css/style.min.css" rel="stylesheet" type="text/css" />
 
     <!-- Chart.js -->
     <script src="assets/js/chart.min.js"></script>
@@ -335,7 +334,7 @@
         </nav>
         <aside>
             <p class="font-medium">Stat Logger — Your personal data tracking companion</p>
-            <p class="opacity-50 text-xs">© 2026 Developed with ❤️ for productivity</p>
+            <p class="opacity-50 text-xs">© 2026 Developed with AI for ❤️</p>
         </aside>
     </footer>
 
@@ -498,6 +497,25 @@
             return stat.unit || '';
         }
 
+        function checkAlert(stat, value, prevValue) {
+            if (value === undefined || value === null || isNaN(value)) return false;
+
+            // Range-based alert (e.g., PI)
+            if (stat.alertMin !== undefined && stat.alertMax !== undefined) {
+                return value < stat.alertMin || value > stat.alertMax;
+            }
+
+            // Condition-based alert (e.g., Temperature, Power, Flow)
+            if (stat.alertThreshold !== undefined && stat.alertCondition) {
+                if (stat.alertCondition === 'above') return value > stat.alertThreshold;
+                if (stat.alertCondition === 'below') return value < stat.alertThreshold;
+                if (stat.alertCondition === 'change' && prevValue !== undefined && prevValue !== null) {
+                    return Math.abs(value - prevValue) >= stat.alertThreshold;
+                }
+            }
+            return false;
+        }
+
         function setupEventListeners() {
             // Save button
             document.getElementById('saveButton').addEventListener('click', saveEntry);
@@ -623,6 +641,7 @@
                 id: 'stat_' + Date.now(),
                 name: 'New Stat',
                 type: 'number',
+                category: 'standard',
                 unit: '',
                 color: '#3b82f6'
             };
@@ -766,6 +785,8 @@
                 }
 
                 input.id = `stat_${stat.id}`;
+                label.setAttribute('for', input.id);
+                label.innerHTML = `<span class="label-text font-semibold">${stat.name} <span class="unit-label">${displayUnit ? `(${displayUnit})` : ''}</span></span>`;
                 div.appendChild(label);
                 div.appendChild(input);
                 container.appendChild(div);
@@ -813,7 +834,7 @@
 
                     if (val !== '' && val !== undefined && val !== null) {
                         // Convert to base units (Imperial) for storage if input was Metric
-                        if (stat.type === 'number' && unitSystem === 'metric') {
+                        if ((stat.type === 'number' || stat.type === 'range') && unitSystem === 'metric') {
                             if (stat.category === 'temperature') val = convert.cToF(val);
                             else if (stat.category === 'weight') val = convert.kgToLbs(val);
                         }
@@ -844,12 +865,24 @@
             // Sort by date
             entriesData.sort((a, b) => dateUtils.parseLocal(b.date) - dateUtils.parseLocal(a.date));
 
+            // Check for alerts based on the template configuration
+            const savedIndex = entriesData.findIndex(e => e.date === date);
+            const prevEntry = entriesData[savedIndex + 1];
+            let activeAlerts = statsConfig
+                .filter(s => checkAlert(s, entry[s.id], prevEntry ? prevEntry[s.id] : undefined))
+                .map(s => s.name);
+
             saveEntriesData();
             clearInputs();
             updateDashboardStats();
             updateTableBody();
             updateChart();
-            showToast('Entry saved successfully!', 'success');
+            
+            if (activeAlerts.length > 0) {
+                showToast(`Saved! ⚠️ Alert for: ${activeAlerts.join(', ')}`, 'warning');
+            } else {
+                showToast('Entry saved successfully!', 'success');
+            }
         }
 
         function clearInputs() {
@@ -905,7 +938,7 @@
 
             const recentEntries = entriesData.slice(0, 10);
 
-            recentEntries.forEach(entry => {
+            recentEntries.forEach((entry, index) => {
                 const tr = document.createElement('tr');
 
                 // Date cell
@@ -919,19 +952,30 @@
                     let rawVal = entry[stat.id];
                     let displayVal = rawVal !== undefined ? rawVal : '-';
 
-                    if (rawVal !== undefined) {
-                        if (stat.type === 'number' && unitSystem === 'metric') {
+                    if (rawVal !== undefined && rawVal !== null) {
+                        const isNumeric = stat.type === 'number' || stat.type === 'range';
+                        const numVal = parseFloat(rawVal);
+                        
+                        if (isNumeric && unitSystem === 'metric') {
                             if (stat.category === 'temperature') displayVal = convert.fToC(rawVal).toFixed(1);
                             else if (stat.category === 'weight') displayVal = convert.lbsToKg(rawVal).toFixed(1);
                             else displayVal = Number(rawVal).toFixed(1);
-                        } else if (stat.type === 'number' || stat.type === 'range') {
-                            displayVal = Number(rawVal).toFixed(1);
+                        } else if (isNumeric) {
+                            displayVal = !isNaN(numVal) ? numVal.toFixed(1) : rawVal;
                         } else if (stat.type === 'checkbox') {
                             displayVal = rawVal ? '✅ Yes' : '❌ No';
                         }
                     }
 
-                    td.textContent = displayVal;
+                    // Apply alert styling if condition is met
+                    const prevEntry = entriesData[index + 1];
+                    const prevRawVal = prevEntry ? prevEntry[stat.id] : undefined;
+
+                    if (checkAlert(stat, rawVal, prevRawVal)) {
+                        td.innerHTML = `<span class="text-error font-bold" title="Alert Condition Triggered">⚠️ ${displayVal}</span>`;
+                    } else {
+                        td.textContent = displayVal;
+                    }
                     tr.appendChild(td);
                 });
 
@@ -963,7 +1007,8 @@
             statsConfig.filter(s => chartableTypes.includes(s.type)).forEach(stat => {
                 const option = document.createElement('option');
                 option.value = stat.id;
-                option.textContent = `${stat.name} ${stat.unit ? `(${stat.unit})` : ''}`;
+                const displayUnit = getDisplayUnit(stat);
+                option.textContent = `${stat.name} ${displayUnit ? `(${displayUnit})` : ''}`;
                 selector.appendChild(option);
             });
         }
@@ -980,8 +1025,8 @@
 
             // Get theme colors from computed styles
             const themeStyles = getComputedStyle(document.documentElement);
-            const isDark = document.documentElement.getAttribute('data-theme').includes('dark') || 
-                           ['black', 'luxury', 'dracula', 'business', 'night', 'coffee', 'dim', 'sunset'].includes(document.documentElement.getAttribute('data-theme'));
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+            const isDark = currentTheme.includes('dark') || ['black', 'luxury', 'dracula', 'business', 'night', 'coffee', 'dim', 'sunset'].includes(currentTheme);
             const axisColor = isDark ? '#9ca3af' : '#6b7280'; // gray-400 : gray-500
             const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)';
 
@@ -1132,6 +1177,7 @@
                     plugins: {
                         legend: { display: false },
                         tooltip: {
+                            displayColors: false,
                             yAlign: 'bottom',
                             backgroundColor: isDark ? '#1f2937' : '#ffffff',
                             titleColor: isDark ? '#f3f4f6' : '#1f2937',

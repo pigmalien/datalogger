@@ -3,6 +3,7 @@
         "id": "systolic",
         "name": "Systolic",
         "type": "number",
+        "category": "standard",
         "unit": "mmHg",
         "color": "#ef4444",
         "min": 90,
@@ -12,6 +13,7 @@
         "id": "diastolic",
         "name": "Diastolic",
         "type": "number",
+        "category": "standard",
         "unit": "mmHg",
         "color": "#3b82f6",
         "min": 60,
@@ -21,6 +23,7 @@
         "id": "pulse",
         "name": "Pulse",
         "type": "number",
+        "category": "standard",
         "unit": "bpm",
         "color": "#ec4899",
         "min": 40,
@@ -30,6 +33,7 @@
         "id": "notes",
         "name": "Notes",
         "type": "text",
+        "category": "standard",
         "unit": "",
         "color": "#6b7280"
     }
