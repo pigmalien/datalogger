@@ -244,7 +244,8 @@
                 </div>
             </div>
 
-            <!-- Right Column: Charts -->
+            {{-- REMOVED: Right Column: Charts --}}
+            {{--
             <div class="card bg-base-100 shadow-xl">
                 <div class="card-body px-2 sm:px-8 py-4 sm:py-8">
                     <h2 class="card-title text-2xl mb-4 px-2 sm:px-0">
@@ -256,37 +257,32 @@
                         Visualizations
                     </h2>
 
-                    <!-- Chart Selector -->
                     <div class="form-control mb-4 px-2 sm:px-0">
                         <select id="chartSelector" class="select select-bordered w-full">
                             <option disabled selected>Select a stat to visualize</option>
                         </select>
                     </div>
 
-                    <!-- Chart Header (Fixed Status) -->
                     <div id="chartLegend"
                         class="flex items-center justify-center gap-2 mb-2 p-2 bg-base-200 rounded-lg text-sm font-medium mx-2 sm:mx-0">
-                        <!-- Legend content will be injected by JS -->
                     </div>
 
-                    <!-- Chart Area (Fixed Y-axis + Scrollable Graph) -->
                     <div
                         class="flex items-stretch h-[320px] bg-base-100 rounded-lg overflow-hidden border border-base-100 relative">
-                        <!-- Pinned Y-Axis -->
                         <div class="w-12 flex-none bg-base-100 z-20 relative h-full border-r border-base-200">
                             <canvas id="yAxisChart"></canvas>
                         </div>
 
-                        <!-- Scrollable Graph -->
                         <div class="chart-container flex-1 h-full overflow-x-auto overflow-y-hidden">
-                            <div id="chartWrapper" class="h-full min-w-full relative">
-                                <canvas id="mainChart"></canvas>
+                            <div id="chartWrapper" class="h-full relative">
+                                <canvas id="mainChart" class="w-full h-full"></canvas>
                             </div>
                         </div>
                     </div>
 
                 </div>
             </div>
+            --}}
         </div>
 
         <!-- Data Table -->
@@ -404,9 +400,9 @@
         // ============================================
         let statsConfig = [];
         let entriesData = [];
-        let currentChart = null;
-        let yAxisChart = null; // To hold the fixed Y-axis scale
-        let currentChartRange = 0; // Default to all data
+        // Removed: let currentChart = null;
+        // Removed: let yAxisChart = null;
+        // Removed: let currentChartRange = 0;
         let unitSystem = localStorage.getItem('unitSystem') || 'imperial';
 
         // ============================================
@@ -417,10 +413,9 @@
             setupEventListeners();
         });
 
-        window.addEventListener('resize', () => {
-            if (currentChart) updateChart();
-        });
-
+        // Removed: window.addEventListener('resize', () => {
+        // Removed:     if (currentChart) updateChart();
+        // Removed: });
         function initializeApp() {
             // Load saved configuration and data
             loadStatsConfig();
@@ -436,7 +431,7 @@
             updateDashboardStats();
             updateTableHeader();
             updateTableBody();
-            updateChartSelector();
+            // Removed: updateChartSelector();
 
             // Load theme preference
             const savedTheme = localStorage.getItem('theme') || 'light';
@@ -475,7 +470,7 @@
             renderStatInputs();
             updateTableHeader();
             updateTableBody();
-            updateChart();
+            // Removed: updateChart();
             showToast(`Switched to ${system} units`, 'info');
         }
 
@@ -521,10 +516,10 @@
             // Save button
             document.getElementById('saveButton').addEventListener('click', saveEntry);
 
-            // Chart selector
-            document.getElementById('chartSelector').addEventListener('change', (e) => {
-                updateChart(e.target.value);
-            });
+            // Removed: Chart selector
+            // Removed: document.getElementById('chartSelector').addEventListener('change', (e) => {
+            // Removed:     updateChart(e.target.value);
+            // Removed: });
         }
 
         // ============================================
@@ -533,10 +528,10 @@
         function changeTheme(theme) {
             document.documentElement.setAttribute('data-theme', theme);
             localStorage.setItem('theme', theme);
-            // Refresh chart to apply new theme colors to tooltip and axes
-            if (document.getElementById('chartSelector').value !== 'Select a stat to visualize') {
-                updateChart();
-            }
+            // Removed: Refresh chart to apply new theme colors to tooltip and axes
+            // Removed: if (document.getElementById('chartSelector').value !== 'Select a stat to visualize') {
+            // Removed:     updateChart();
+            // Removed: }
             showToast(`Theme changed to ${theme.charAt(0).toUpperCase() + theme.slice(1)}`, 'success');
         }
 
@@ -709,7 +704,7 @@
         function saveStatsConfig() {
             saveStatsConfigToStorage();
             renderStatInputs();
-            updateChartSelector();
+            // Removed: updateChartSelector();
             updateTableHeader();
             updateTableBody();
             manageTemplateModal.close();
@@ -911,7 +906,7 @@
             clearInputs();
             updateDashboardStats();
             updateTableBody();
-            updateChart();
+            // Removed: updateChart();
             
             if (activeAlerts.length > 0) {
                 showToast(`Saved! ⚠️ Alert for: ${activeAlerts.join(', ')}`, 'warning');
@@ -934,7 +929,7 @@
                 saveEntriesData();
                 updateDashboardStats();
                 updateTableBody();
-                updateChart();
+                // Removed: updateChart();
                 showToast('Entry deleted', 'info');
             }
         }
@@ -1034,254 +1029,238 @@
         // ============================================
         // CHART MANAGEMENT
         // ============================================
-        function updateChartSelector() {
-            const selector = document.getElementById('chartSelector');
-            selector.innerHTML = '<option disabled selected>Select a stat to visualize</option>';
-
-            const chartableTypes = ['number', 'range', 'checkbox'];
-            statsConfig.filter(s => chartableTypes.includes(s.type)).forEach(stat => {
-                const option = document.createElement('option');
-                option.value = stat.id;
-                const displayUnit = getDisplayUnit(stat);
-                option.textContent = `${stat.name} ${displayUnit ? `(${displayUnit})` : ''}`;
-                selector.appendChild(option);
-            });
-        }
-
-        function updateChart(statId) {
-            if (!statId) {
-                statId = document.getElementById('chartSelector').value;
-            }
-
-            if (!statId || statId === 'Select a stat to visualize') return;
-
-            const stat = statsConfig.find(s => s.id === statId);
-            if (!stat) return;
-
-            // Get theme colors from computed styles
-            const themeStyles = getComputedStyle(document.documentElement);
-            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-            const isDark = currentTheme.includes('dark') || ['black', 'luxury', 'dracula', 'business', 'night', 'coffee', 'dim', 'sunset'].includes(currentTheme);
-            const axisColor = isDark ? '#9ca3af' : '#6b7280'; // gray-400 : gray-500
-            const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)';
-
-            // Prepare chart data (Explicitly sorted Oldest -> Newest)
-            const chartData = [...entriesData].sort((a, b) => dateUtils.parseLocal(a.date) - dateUtils.parseLocal(b.date));
-            const labels = chartData.map(e => dateUtils.parseLocal(e.date).toLocaleDateString('en-US', { weekday: 'short' }));
-            const fullDates = chartData.map(e => dateUtils.toDisplayDate(e.date)); // Keep for tooltip
-            const data = chartData.map(e => {
-                let val = e[statId];
-                if (val === undefined || val === null || val === '') return null;
-
-                let numVal = parseFloat(val);
-                if (isNaN(numVal)) return null;
-
-                if (unitSystem === 'metric') {
-                    if (stat.category === 'temperature') return convert.fToC(numVal);
-                    if (stat.category === 'weight') return convert.lbsToKg(numVal);
-                }
-                return numVal;
-            });
-
-            // Resize Wrapper for scrolling based on data points
-            const wrapper = document.getElementById('chartWrapper');
-            const mainChartCanvas = document.getElementById('mainChart'); // Get the canvas element
-            const minSpacing = 45; // reduced for mobile/small screen compatibility
-            const calculatedWidth = labels.length * minSpacing;
-            const containerWidth = wrapper.parentElement.clientWidth || window.innerWidth;
-            const finalWrapperWidth = Math.max(calculatedWidth, containerWidth); // Calculate the final width
-            wrapper.style.width = finalWrapperWidth + 'px'; // Set wrapper width
-
-            // Set canvas width to match wrapper width for Chart.js to render correctly
-            mainChartCanvas.width = finalWrapperWidth; // <--- ADD THIS LINE
-
-            // Destroy existing chart
-            if (currentChart) {
-                currentChart.destroy();
-            }
-
-            // Determine Y-axis limits
-            let yMin = undefined;
-            let yMax = undefined;
-
-            if (stat.min !== undefined && stat.min !== null) {
-                yMin = stat.min;
-                if (unitSystem === 'metric') {
-                    if (stat.category === 'temperature') yMin = convert.fToC(yMin);
-                    else if (stat.category === 'weight') yMin = convert.lbsToKg(yMin);
-                }
-            }
-
-            if (stat.max !== undefined && stat.max !== null) {
-                yMax = stat.max;
-                if (unitSystem === 'metric') {
-                    if (stat.category === 'temperature') yMax = convert.fToC(yMax);
-                    else if (stat.category === 'weight') yMax = convert.lbsToKg(yMax);
-                }
-            }
-
-            // Update fixed HTML Legend (not scrollable)
-            const legend = document.getElementById('chartLegend');
-            const displayUnit = getDisplayUnit(stat);
-            legend.innerHTML = `
-                <span class="w-3 h-3 rounded-full" style="background-color: ${stat.color};"></span>
-                <span class="opacity-70">${stat.name}</span>
-                ${displayUnit ? `<span class="badge badge-sm badge-ghost opacity-70 font-normal">${displayUnit}</span>` : ''}
-            `;
-
-            // Global y settings for scale synchronization
-            const ySettings = {
-                beginAtZero: stat.type === 'checkbox' || stat.id === 'power' || stat.id === 'flow' ? true : false,
-                min: yMin,
-                max: yMax
-            };
-
-            // Sync scales by calculating bounds from data if not explicitly set in config
-            const validValues = data.filter(v => v !== null && !isNaN(v));
-            if (validValues.length > 0) {
-                if (ySettings.min === undefined) {
-                    const dataMin = Math.min(...validValues);
-                    ySettings.min = ySettings.beginAtZero ? 0 : dataMin * 0.98;
-                }
-                if (ySettings.max === undefined) {
-                    const dataMax = Math.max(...validValues);
-                    ySettings.max = dataMax * 1.02;
-                }
-            }
-
-            // Build/Update Pinned Y-Axis Chart
-            if (yAxisChart) yAxisChart.destroy();
-            const yCtx = document.getElementById('yAxisChart').getContext('2d');
-            yAxisChart = new Chart(yCtx, {
-                type: 'line',
-                data: { datasets: [] },
-                options: {
-                    animation: false,
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    layout: { padding: { top: 10, left: 0, right: 0, bottom: 32 } },
-                    plugins: { legend: { display: false }, tooltip: { enabled: false } },
-                    scales: {
-                        x: { display: false },
-                        y: {
-                            ...ySettings,
-                            display: true,
-                            position: 'left',
-                            afterFit: function(scale) {
-                                scale.width = 48; // Match container width (w-12 = 48px)
-                            },
-                            border: { display: false }, // Remove vertical rule
-                            grid: { display: false },
-                            ticks: {
-                                font: { size: 11, weight: '500' },
-                                color: axisColor,
-                                padding: 2,
-                                crossAlign: 'far', // Align numbers close to the graph
-                                callback: function (value) {
-                                    return value >= 1000 ? (value / 1000).toFixed(1) + 'k' : value;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-
-            // Create new Main Data Chart
-            const ctx = document.getElementById('mainChart').getContext('2d');
-            currentChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: `${stat.name} ${displayUnit ? `(${displayUnit})` : ''}`,
-                        data: data,
-                        borderColor: stat.color,
-                        backgroundColor: stat.color + '20',
-                        tension: 0.4,
-                        fill: true,
-                        pointRadius: 0,
-                        pointHoverRadius: 4,
-                        pointHitRadius: 10,
-                        spanGaps: true
-                    }]
-                },
-                options: {
-                    animation: false,
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    layout: { padding: { top: 10, left: 0, bottom: 0, right: 10 } },
-                    interaction: {
-                        intersect: false,
-                        mode: 'index',
-                    },
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            displayColors: false,
-                            yAlign: 'bottom',
-                            backgroundColor: isDark ? '#1f2937' : '#ffffff',
-                            titleColor: isDark ? '#f3f4f6' : '#1f2937',
-                            bodyColor: isDark ? '#f3f4f6' : '#1f2937',
-                            borderColor: stat.color,
-                            borderWidth: 1,
-                            padding: 10,
-                            callbacks: {
-                                title: function(context) {
-                                    // Show full date in tooltip title
-                                    return fullDates[context[0].dataIndex];
-                                },
-                                label: function (context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) label += ': ';
-                                    if (context.parsed.y !== null) label += context.parsed.y.toFixed(1);
-                                    return label;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            ...ySettings,
-                            display: true,
-                            position: 'left',
-                            afterFit: function(scale) {
-                                scale.width = 0; // Remove space reserved for hidden scale
-                            },
-                            ticks: { display: false },
-                            border: { display: false }, // Also remove border here for seamless look
-                            grid: {
-                                display: true,
-                                color: gridColor,
-                                drawTicks: false
-                            }
-                        },
-                        x: {
-                            grid: {
-                                display: true,
-                                color: gridColor,
-                                drawTicks: true
-                            },
-                            ticks: { 
-                                font: { size: 10 },
-                                color: axisColor
-                            }
-                        }
-                    }
-                }
-            });
-
-            // Automatically scroll to the newest data (the right side)
-            setTimeout(() => {
-                const container = document.querySelector('.chart-container');
-                container.scrollLeft = container.scrollWidth;
-            }, 50);
-        }
-
-        function updateChartRange(days) {
-            currentChartRange = days;
-            updateChart();
-        }
-
+        // Removed: function updateChartSelector() {
+        // Removed:     const selector = document.getElementById('chartSelector');
+        // Removed:     selector.innerHTML = '<option disabled selected>Select a stat to visualize</option>';
+        // Removed:
+        // Removed:     const chartableTypes = ['number', 'range', 'checkbox'];
+        // Removed:     statsConfig.filter(s => chartableTypes.includes(s.type)).forEach(stat => {
+        // Removed:         const option = document.createElement('option');
+        // Removed:         option.value = stat.id;
+        // Removed:         const displayUnit = getDisplayUnit(stat);
+        // Removed:         option.textContent = `${stat.name} ${displayUnit ? `(${displayUnit})` : ''}`;
+        // Removed:         selector.appendChild(option);
+        // Removed:     });
+        // Removed: }
+        // Removed: function updateChart(statId) {
+        // Removed:     if (!statId) {
+        // Removed:         statId = document.getElementById('chartSelector').value;
+        // Removed:     }
+        // Removed:
+        // Removed:     if (!statId || statId === 'Select a stat to visualize') return;
+        // Removed:
+        // Removed:     const stat = statsConfig.find(s => s.id === statId);
+        // Removed:     if (!stat) return;
+        // Removed:
+        // Removed:     const themeStyles = getComputedStyle(document.documentElement);
+        // Removed:     const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+        // Removed:     const isDark = currentTheme.includes('dark') || ['black', 'luxury', 'dracula', 'business', 'night', 'coffee', 'dim', 'sunset'].includes(currentTheme);
+        // Removed:     const axisColor = isDark ? '#9ca3af' : '#6b7280';
+        // Removed:     const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)';
+        // Removed:
+        // Removed:     const chartData = [...entriesData].sort((a, b) => dateUtils.parseLocal(a.date) - dateUtils.parseLocal(b.date));
+        // Removed:     const labels = chartData.map(e => dateUtils.parseLocal(e.date).toLocaleDateString('en-US', { weekday: 'short' }));
+        // Removed:     const fullDates = chartData.map(e => dateUtils.toDisplayDate(e.date));
+        // Removed:     const data = chartData.map(e => {
+        // Removed:         let val = e[statId];
+        // Removed:         if (val === undefined || val === null || val === '') return null;
+        // Removed:
+        // Removed:         let numVal = parseFloat(val);
+        // Removed:         if (isNaN(numVal)) return null;
+        // Removed:
+        // Removed:         if (unitSystem === 'metric') {
+        // Removed:             if (stat.category === 'temperature') return convert.fToC(numVal);
+        // Removed:             if (stat.category === 'weight') return convert.lbsToKg(numVal);
+        // Removed:         }
+        // Removed:         return numVal;
+        // Removed:     });
+        // Removed:
+        // Removed:     const wrapper = document.getElementById('chartWrapper');
+        // Removed:     const mainChartCanvas = document.getElementById('mainChart'); // Get the canvas element
+        // Removed:     const minSpacing = 45;
+        // Removed:     const calculatedWidth = labels.length * minSpacing;
+        // Removed:     const containerWidth = wrapper.parentElement.clientWidth || window.innerWidth;
+        // Removed:     const finalWrapperWidth = Math.max(calculatedWidth, containerWidth);
+        // Removed:     wrapper.style.width = finalWrapperWidth + 'px';
+        // Removed:
+        // Removed:     mainChartCanvas.width = finalWrapperWidth; // <--- ADD THIS LINE
+        // Removed:
+        // Removed:     if (currentChart) {
+        // Removed:         currentChart.destroy();
+        // Removed:     }
+        // Removed:
+        // Removed:     let yMin = undefined;
+        // Removed:     let yMax = undefined;
+        // Removed:
+        // Removed:     if (stat.min !== undefined && stat.min !== null) {
+        // Removed:         yMin = stat.min;
+        // Removed:         if (unitSystem === 'metric') {
+        // Removed:             if (stat.category === 'temperature') yMin = convert.fToC(yMin);
+        // Removed:             else if (stat.category === 'weight') yMin = convert.lbsToKg(yMin);
+        // Removed:         }
+        // Removed:     }
+        // Removed:
+        // Removed:     if (stat.max !== undefined && stat.max !== null) {
+        // Removed:         yMax = stat.max;
+        // Removed:         if (unitSystem === 'metric') {
+        // Removed:             if (stat.category === 'temperature') yMax = convert.fToC(yMax);
+        // Removed:             else if (stat.category === 'weight') yMax = convert.lbsToKg(yMax);
+        // Removed:         }
+        // Removed:     }
+        // Removed:
+        // Removed:     const legend = document.getElementById('chartLegend');
+        // Removed:     const displayUnit = getDisplayUnit(stat);
+        // Removed:     legend.innerHTML = `
+        // Removed:         <span class="w-3 h-3 rounded-full" style="background-color: ${stat.color};"></span>
+        // Removed:         <span class="opacity-70">${stat.name}</span>
+        // Removed:         ${displayUnit ? `<span class="badge badge-sm badge-ghost opacity-70 font-normal">${displayUnit}</span>` : ''}
+        // Removed:     `;
+        // Removed:
+        // Removed:     const ySettings = {
+        // Removed:         beginAtZero: stat.type === 'checkbox' || stat.id === 'power' || stat.id === 'flow' ? true : false,
+        // Removed:         min: yMin,
+        // Removed:         max: yMax
+        // Removed:     };
+        // Removed:
+        // Removed:     const validValues = data.filter(v => v !== null && !isNaN(v));
+        // Removed:     if (validValues.length > 0) {
+        // Removed:         if (ySettings.min === undefined) {
+        // Removed:             const dataMin = Math.min(...validValues);
+        // Removed:             ySettings.min = ySettings.beginAtZero ? 0 : dataMin * 0.98;
+        // Removed:         }
+        // Removed:         if (ySettings.max === undefined) {
+        // Removed:             const dataMax = Math.max(...validValues);
+        // Removed:             ySettings.max = dataMax * 1.02;
+        // Removed:         }
+        // Removed:     }
+        // Removed:
+        // Removed:     if (yAxisChart) yAxisChart.destroy();
+        // Removed:     const yCtx = document.getElementById('yAxisChart').getContext('2d');
+        // Removed:     yAxisChart = new Chart(yCtx, {
+        // Removed:         type: 'line',
+        // Removed:         data: { datasets: [] },
+        // Removed:         options: {
+        // Removed:             animation: false,
+        // Removed:             responsive: true,
+        // Removed:             maintainAspectRatio: false,
+        // Removed:             layout: { padding: { top: 10, left: 0, right: 0, bottom: 32 } },
+        // Removed:             plugins: { legend: { display: false }, tooltip: { enabled: false } },
+        // Removed:             scales: {
+        // Removed:                 x: { display: false },
+        // Removed:                 y: {
+        // Removed:                     ...ySettings,
+        // Removed:                     display: true,
+        // Removed:                     position: 'left',
+        // Removed:                     afterFit: function(scale) {
+        // Removed:                         scale.width = 48;
+        // Removed:                     },
+        // Removed:                     border: { display: false },
+        // Removed:                     grid: { display: false },
+        // Removed:                     ticks: {
+        // Removed:                         font: { size: 11, weight: '500' },
+        // Removed:                         color: axisColor,
+        // Removed:                         padding: 2,
+        // Removed:                         crossAlign: 'far',
+        // Removed:                         callback: function (value) {
+        // Removed:                             return value >= 1000 ? (value / 1000).toFixed(1) + 'k' : value;
+        // Removed:                         }
+        // Removed:                     }
+        // Removed:                 }
+        // Removed:             }
+        // Removed:         }
+        // Removed:     });
+        // Removed:
+        // Removed:     const ctx = document.getElementById('mainChart').getContext('2d');
+        // Removed:     currentChart = new Chart(ctx, {
+        // Removed:         type: 'line',
+        // Removed:         data: {
+        // Removed:             labels: labels,
+        // Removed:             datasets: [{
+        // Removed:                 label: `${stat.name} ${displayUnit ? `(${displayUnit})` : ''}`,
+        // Removed:                 data: data,
+        // Removed:                 borderColor: stat.color,
+        // Removed:                 backgroundColor: stat.color + '20',
+        // Removed:                 tension: 0.4,
+        // Removed:                 fill: true,
+        // Removed:                 pointRadius: 0,
+        // Removed:                 pointHoverRadius: 4,
+        // Removed:                 pointHitRadius: 10,
+        // Removed:                 spanGaps: true
+        // Removed:             }]
+        // Removed:         },
+        // Removed:         options: {
+        // Removed:             animation: false,
+        // Removed:             responsive: true,
+        // Removed:             maintainAspectRatio: false,
+        // Removed:             layout: { padding: { top: 10, left: 0, bottom: 0, right: 10 } },
+        // Removed:             interaction: {
+        // Removed:                 intersect: false,
+        // Removed:                 mode: 'index',
+        // Removed:             },
+        // Removed:             plugins: {
+        // Removed:                 legend: { display: false },
+        // Removed:                 tooltip: {
+        // Removed:                     displayColors: false,
+        // Removed:                     yAlign: 'bottom',
+        // Removed:                     backgroundColor: isDark ? '#1f2937' : '#ffffff',
+        // Removed:                     titleColor: isDark ? '#f3f4f6' : '#1f2937',
+        // Removed:                     bodyColor: isDark ? '#f3f4f6' : '#1f2937',
+        // Removed:                     borderColor: stat.color,
+        // Removed:                     borderWidth: 1,
+        // Removed:                     padding: 10,
+        // Removed:                     callbacks: {
+        // Removed:                         title: function(context) {
+        // Removed:                             return fullDates[context[0].dataIndex];
+        // Removed:                         },
+        // Removed:                         label: function (context) {
+        // Removed:                             let label = context.dataset.label || '';
+        // Removed:                             if (label) label += ': ';
+        // Removed:                             if (context.parsed.y !== null) label += context.parsed.y.toFixed(1);
+        // Removed:                             return label;
+        // Removed:                         }
+        // Removed:                     }
+        // Removed:                 }
+        // Removed:             },
+        // Removed:             scales: {
+        // Removed:                 y: {
+        // Removed:                     ...ySettings,
+        // Removed:                     display: true,
+        // Removed:                     position: 'left',
+        // Removed:                     afterFit: function(scale) {
+        // Removed:                         scale.width = 0;
+        // Removed:                     },
+        // Removed:                     ticks: { display: false },
+        // Removed:                     border: { display: false },
+        // Removed:                     grid: {
+        // Removed:                         display: true,
+        // Removed:                         color: gridColor,
+        // Removed:                         drawTicks: false
+        // Removed:                     }
+        // Removed:                 },
+        // Removed:                 x: {
+        // Removed:                     grid: {
+        // Removed:                         display: true,
+        // Removed:                         color: gridColor,
+        // Removed:                         drawTicks: true
+        // Removed:                     },
+        // Removed:                     ticks: {
+        // Removed:                         font: { size: 10 },
+        // Removed:                         color: axisColor
+        // Removed:                     }
+        // Removed:                 }
+        // Removed:             }
+        // Removed:         }
+        // Removed:     });
+        // Removed:
+        // Removed:     setTimeout(() => {
+        // Removed:         const container = document.querySelector('.chart-container');
+        // Removed:         container.scrollLeft = container.scrollWidth;
+        // Removed:     }, 50);
+        // Removed: }
+        // Removed: function updateChartRange(days) {
+        // Removed:     currentChartRange = days;
+        // Removed:     updateChart();
+        // Removed: }
         // ============================================
         // IMPORT/EXPORT
         // ============================================
@@ -1314,7 +1293,7 @@
                         saveStatsConfigToStorage();
                         renderStatInputs();
                         renderStatsConfigUI();
-                        updateChartSelector();
+                        // Removed: updateChartSelector();
                         updateTableHeader();
                         updateTableBody();
                         importTemplateModal.close();
@@ -1389,7 +1368,7 @@
                 saveEntriesData();
                 updateDashboardStats();
                 updateTableBody();
-                updateChart();
+                // Removed: updateChart();
                 importDataModal.close();
                 showToast('Data imported successfully!', 'success');
             }
